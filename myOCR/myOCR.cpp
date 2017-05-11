@@ -6,12 +6,13 @@
 
 int main()
 {
-	Image img(2, 2);
-	for(int i=0; i<4; i++)
-	 img[i] = i+1;
+	Image img(4, 4);
+	for(int i=0; i<16; i++)
+	 img[i] = 1;
 	float  tmp=0.0;
 	Filters F;
-	tmp = F.filter0(img, 0, 2);
+	
+	tmp = F.filter12(img, 0, 4);
 	std::cout << tmp;
 	system("pause");
     return 0;

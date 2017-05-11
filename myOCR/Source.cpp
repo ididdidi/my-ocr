@@ -111,7 +111,7 @@ float Filters::filter4(Image& image, unsigned int numberPix, const int& widthMas
 	{
 		for (int j = 0; j < widthMask; j++)
 		{
-			if (j<(widthMask/4) || j>(widthMask*3/4) ) temp -= image[numberPix++];
+			if (j<=(widthMask/4) || j>(widthMask*3/4) ) temp -= image[numberPix++];
 			else temp += image[numberPix++];
 		}
 		numberPix += width - widthMask;
@@ -127,7 +127,7 @@ float Filters::filter5(Image& image, unsigned int numberPix, const int& widthMas
 	{
 		for (int j = 0; j < widthMask; j++)
 		{
-			if (j<(heigth / 4) || j>(heigth * 3 / 4)) temp -= image[numberPix++];
+			if (j<=(heigth / 4) || j>(heigth * 3 / 4)) temp -= image[numberPix++];
 			else temp += image[numberPix++];
 		}
 		numberPix += width - widthMask;
@@ -143,7 +143,7 @@ float Filters::filter6(Image& image, unsigned int numberPix, const int& widthMas
 	{
 		for (int j = 0; j < widthMask; j++)
 		{
-			if (i<(heigth / 2)&&j<(widthMask / 4) || i<(heigth / 2) && j>(widthMask * 3 / 4) || i>(heigth / 2) && j>(widthMask / 4) && j<(widthMask * 3 / 4))
+			if (i<=(heigth / 2)&&j<=(widthMask / 4) || i<=(heigth / 2) && j>(widthMask * 3 / 4) || i>(heigth / 2) && j>(widthMask / 4) && j<=(widthMask * 3 / 4))
 				temp -= image[numberPix++];
 			else temp += image[numberPix++];
 		}
@@ -160,7 +160,7 @@ float Filters::filter7(Image& image, unsigned int numberPix, const int& widthMas
 	{
 		for (int j = 0; j < widthMask; j++)
 		{
-			if (j<(widthMask / 2) && i>(heigth / 4) && i<(heigth * 3 / 4) || j>(widthMask / 2) && i<(heigth / 4) || i>(heigth * 3 / 4) && j>(widthMask / 2))
+			if (j<=(widthMask / 2) && i>(heigth / 4) && i<=(heigth * 3 / 4) || j>(widthMask / 2) && i<=(heigth / 4) || i>(heigth * 3 / 4) && j>(widthMask / 2))
 				temp -= image[numberPix++];
 			else temp += image[numberPix++];
 		}
@@ -196,7 +196,7 @@ float Filters::filter9(Image& image, unsigned int numberPix, const int& widthMas
 	{
 		for (int j = 0; j < widthMask; j++)
 		{
-			if (j>(widthMask / 4) && j<(widthMask / 2) || j>(widthMask * 3 / 4))
+			if ((j>(widthMask / 4) && j<=(widthMask / 2)) || j>=(widthMask * 3 / 4))
 				temp -= image[numberPix++];
 			else temp += image[numberPix++];
 		}
@@ -213,7 +213,7 @@ float Filters::filter10(Image& image, unsigned int numberPix, const int& widthMa
 	{
 		for (int j = 0; j < widthMask; j++)
 		{
-			if (i<(heigth / 4) || i>(heigth / 2) && i<(heigth * 3 / 4))
+			if (i<=(heigth / 4) || (i>(heigth / 2) && i<(heigth * 3 / 4)))
 				temp -= image[numberPix++];
 			else temp += image[numberPix++];
 		}
@@ -230,10 +230,10 @@ float Filters::filter11(Image& image, unsigned int numberPix, const int& widthMa
 	{
 		for (int j = 0; j < widthMask; j++)
 		{
-			if (i<(heigth / 2))
-				if (j>(widthMask / 4) && j<(widthMask / 2) || j>(widthMask * 3 / 4))temp -= image[numberPix++];
+			if (i<=(heigth / 2))
+				if (j>(widthMask / 4) && j<=(widthMask / 2) || j>=(widthMask * 3 / 4))temp -= image[numberPix++];
 				else temp += image[numberPix++];
-			else if (j<(widthMask / 4) || j>(widthMask / 2) && j<(widthMask * 3 / 4))temp -= image[numberPix++];
+			else if (j<=(widthMask / 4) || j>(widthMask / 2) && j<(widthMask * 3 / 4))temp -= image[numberPix++];
 				else temp += image[numberPix++];
 		}
 		numberPix += width - widthMask;
@@ -250,9 +250,9 @@ float Filters::filter12(Image& image, unsigned int numberPix, const int& widthMa
 		for (int j = 0; j < widthMask; j++)
 		{
 			if (j<(widthMask / 2))
-				if (i>(heigth / 4) && i<(heigth / 2) || i>(heigth * 3 / 4))temp -= image[numberPix++];
+				if ((i>(heigth / 4) && i<=(heigth / 2)) || i>(heigth * 3 / 4))temp -= image[numberPix++];
 				else temp += image[numberPix++];
-			else if (i<(heigth / 4) || i>(heigth / 2) && i<(heigth * 3 / 4))temp -= image[numberPix++];
+			else if (i<=(heigth / 4) || (i>=(heigth / 2) && i<(heigth * 3 / 4)))temp -= image[numberPix++];
 			else temp += image[numberPix++];
 		}
 		numberPix += width - widthMask;
