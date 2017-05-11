@@ -1,6 +1,7 @@
 #pragma once
 #ifndef MAINHEAD
 #define MAINHEAD
+#define QF 16						// Количество филььров
 class Pixel						// хранит яркость пикселя
 {
 private:
@@ -34,31 +35,23 @@ public:
 	char putPixel(const unsigned int& numberPix);
 	char& operator [](const unsigned int& numberPix);
 };
-class Filters								// хранит фильтры ТАБ в виде методов;
-{
-public:
-	float filter0(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter1(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter2(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter3(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter4(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter5(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter6(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter7(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter8(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter9(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter10(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter11(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter12(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter13(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter14(Image& image, unsigned int numberPixel, const int& widthMas);
-	float filter15(Image& image, unsigned int numberPixel, const int& widthMas);
-};
-class Srainer : public Filters				// реализует наложение фильтров ТАВ;
+class Strainer								// реализует наложение фильтров ТАВ;
 {
 protected:
-	int x0, xk;								// начальное и конечное положение фильтра;
-	float rest;								// результатналожения фильтров;
+//	int x0, xk;								// начальное и конечное положение фильтра;
+	float Filtered[QF];						// результатналожения фильтров;
+public:
+	Strainer() //: x0(0), xk(0)
+	{
+		for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
+	}
+	Strainer(float M[QF])
+	{
+		for (int i = 0; i < QF; i++)Filtered[i] = M[i];
+	}
+	void filtering(Image& image, const unsigned int& x0, const unsigned int& xk);
+	void display();
+	
 };
 
 

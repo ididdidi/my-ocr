@@ -12,6 +12,8 @@
 #include <tchar.h>
 #include <stdlib.h>
 #include <iostream>
+#include <iomanip>
+using namespace std;
 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы

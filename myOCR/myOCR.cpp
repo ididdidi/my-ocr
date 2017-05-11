@@ -6,14 +6,14 @@
 
 int main()
 {
+	unsigned int x0 = 0, xk = 4;
 	Image img(4, 4);
 	for(int i=0; i<16; i++)
 	 img[i] = 1;
-	float  tmp=0.0;
-	Filters F;
-	
-	tmp = F.filter12(img, 0, 4);
-	std::cout << tmp;
+	Strainer S;
+	S.filtering(img, x0, xk);
+	S.display();
+
 	system("pause");
     return 0;
 }
