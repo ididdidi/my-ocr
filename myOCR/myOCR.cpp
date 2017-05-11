@@ -14,6 +14,8 @@ int main()
 	S.filtering(img, x0, xk);
 	S.display();
 
+	cout << endl << img.extremum(x0, xk);
+
 	system("pause");
     return 0;
 }

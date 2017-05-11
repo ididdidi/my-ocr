@@ -5,15 +5,17 @@
 
 #pragma once
 
-#include "targetver.h"
-#include "main.h"
-
 #include <stdio.h>
 #include <tchar.h>
 #include <stdlib.h>
 #include <iostream>
 #include <iomanip>
+#include <list>
 using namespace std;
+
+#include "targetver.h"
+#include "main.h"
+
 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
