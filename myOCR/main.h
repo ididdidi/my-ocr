@@ -34,33 +34,36 @@ public:
 	void getPixel(const unsigned int& numberPix, const char& br);
 	char putPixel(const unsigned int& numberPix);
 	char& operator [](const unsigned int& numberPix);
-	float extremum(unsigned int posX, const unsigned int& widthMask);
+	float valueF(unsigned int posX, const unsigned int& widthMask);
 };
-class Settings					// параметры вводимые пользователем
+class Settings						// параметры вводимые пользователем
 {
 public:
-	unsigned int widthMask;		// ширина накладываемой маски при поиске экстреммум f1
-	unsigned int stepOffset;	// шаг смещения при поиске экстреммум f1
-	unsigned int minInterval;	// минимальная ширина символа
-	unsigned int maxInterval;	// максимальная ширина символа
-	float percentOverlay;		// процент наложения 
+	unsigned int widthMask = 4;		// ширина накладываемой маски при поиске экстреммум f1
+	unsigned int stepOffset = 1;	// шаг смещения при поиске экстреммум f1
+	unsigned int minInterval = 3;	// минимальная ширина символа в пикселях
+	unsigned int maxInterval = 5;	// максимальная ширина символа в пикселях
+	float percentOverlay = 100;		// процент наложения 
 };
-class Strainer								// реализует наложение фильтров ТАВ;
+class Sample								// находит хранит, и записывает эталоны;
 {
 protected:
+	char match;								// номер эталона
 	float Filtered[QF];						// результатналожения фильтров;
 public:
-	Strainer() //: x0(0), xk(0)
+	Sample()
 	{
 		for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
 	}
-	Strainer(float M[QF])
+	Sample(float M[QF])
 	{
 		for (int i = 0; i < QF; i++)Filtered[i] = M[i];
 	}
+	char returnMatch();
 	void filtering(Image& image, const unsigned int& x0, const unsigned int& xEnd);
 	void display();
-	
+	void diskOut();
+	float operator - (Sample& matchFiltred);
 };
 class Compliance
 {
@@ -76,11 +79,12 @@ public:
 		x0(X0), xEnd(End), nearestMatch(nM), CartesianDistance(CD)
 	{ }
 };
-class Sample : public Strainer		// выборка совпадений
+class Strainer : public Sample		// выборка совпадений
 {
 protected:
 	list<Compliance> compliance;
 public:
+	char compareWithBase(float& MinCD);
 	void selection(Image& image, Settings& user);
 };
 #endif // !MAINHEAD

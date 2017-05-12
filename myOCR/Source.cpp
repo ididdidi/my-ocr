@@ -31,7 +31,7 @@ unsigned int Image::putWidth()
 {
 	return width;
 }
-float Image::extremum(unsigned int posX, const unsigned int& widthMask)
+float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 {
 	float temp = 0.0;
 	for (unsigned int i = 0; i < height; i++)
@@ -52,8 +52,12 @@ char& Image::operator[](const unsigned int& numberPix)
 	return pixel[numberPix].put();
 }
 
-//	методы класса Strainer
-void Strainer::filtering(Image& image, const unsigned int& x0, const unsigned int& xEnd)
+//	методы класса Sample
+char Sample::returnMatch()
+{
+	return match;
+}
+void Sample::filtering(Image& image, const unsigned int& x0, const unsigned int& xEnd)
 {
 	unsigned int numberPix = x0;				// начальная координата наложения фильтра
 	unsigned int widthMask = (xEnd - x0) / 4;	// масштабируем фильтр по размеру отрезка
@@ -168,14 +172,59 @@ void Strainer::filtering(Image& image, const unsigned int& x0, const unsigned in
 		numberPix += width - widthMask;
 	}
 }
-void Strainer::display()
+void Sample::display()
 {
+	cout << endl << match << '|';
 	for (int i = 0; i < QF; i++)
 		cout << setw(7) << Filtered[i];
 }
+void Sample::diskOut()						// Запись в конец файла.
+{
+		cout << " Запись эталона в базу";
+	cout << " Введите символ... ";  cin >> match;
 
-//	методы класса Sample
-void Sample::selection(Image& image, Settings& user)
+	ofstream outfile;						// созадан поток вывода
+	outfile.open("MatchBase.dat", ios::app | ios::out | ios::binary); // открыть для записи
+	outfile.write((char*)this, sizeof(*this));	// Объект записан;
+	outfile.close();	
+}
+float Sample::operator - (Sample& match)
+{
+	long double temp = 0.0;
+	for (int i = 0; i < QF; i++)
+	{
+		double minus = Filtered[i] - match.Filtered[i];
+		temp = minus*minus;
+	}
+	return (float)sqrt(temp);
+}
+
+//	методы класса Strainer
+char Strainer::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращает ближайший
+{											 // и расстояние до него(&MinCD);
+	char  nearestMatch = 0;
+	float tempCD;				// текущее значение декартовова расстояния
+	Sample tempSample;			// буфер для временного хранения эталонов
+	fstream infile;				// открыть поток ввода из файла;
+	infile.open("MatchBase.dat", ios::in | ios::binary);
+	if (!infile) exit(3);
+								// считываем значения эталонв из обучающей выборки:
+	infile.read(reinterpret_cast<char*>(&tempSample), sizeof(tempSample));
+	while (!infile.eof()) 
+	{
+		tempCD = *this - tempSample;	// находим декартово расстояние
+		if (!nearestMatch || MinCD > tempCD) // если это первое сравнение или  
+		{									// предыдущее декартово рсстояние больше
+			MinCD = tempCD;					// сохраняем это как минимальное
+											// запоминаем эталон как наиболее близкий
+			nearestMatch = tempSample.returnMatch(); 
+		}						// считываем значения эталонв из обучающей выборки:
+		infile.read(reinterpret_cast<char*>(&tempSample), sizeof(tempSample));
+	}
+	infile.close();
+	return nearestMatch;		// вернём ближайший эталон
+}
+void Strainer::selection(Image& image, Settings& user)
 {
 	char way=0;					// направление обхода алгоритма обработки;
 								// количество шагов
@@ -188,26 +237,33 @@ void Sample::selection(Image& image, Settings& user)
 	int j = 0;					// индекс циклов обработки
 	unsigned int posX = 0;		// текущая позиция по X
 	float MinCD;				// минимальное декартово расстояние
-	int  nearestMatch;			// ближайший эталон
-	float tempCD;				// текущее значение декартовова расстояния
+	char  nearestMatch = 0;		// ближайший эталон
 
 						// внешний цикл обработки. обход по ширине изображения с заданным шагом 
 	for (int i = 0; i <= numberOfSteps; i++)
 	{
-		posX += stepOffset;	// ищем левую границу искомого объекта
-		if (((image.extremum(posX - stepOffset, widthMask) < image.extremum(posX, widthMask))
-			&& (image.extremum(posX, widthMask) > image.extremum(posX + stepOffset, widthMask)))
-			|| ((image.extremum(posX - stepOffset, widthMask) > image.extremum(posX, widthMask))
-				&& (image.extremum(posX, widthMask) < image.extremum(posX + stepOffset, widthMask))))
+		posX += stepOffset;	// ищем левую границу искомого объекта(через экстремуму)
+		if (((image.valueF(posX - stepOffset, widthMask) < image.valueF(posX, widthMask))
+			&& (image.valueF(posX, widthMask) > image.valueF(posX + stepOffset, widthMask)))
+			|| ((image.valueF(posX - stepOffset, widthMask) > image.valueF(posX, widthMask))
+				&& (image.valueF(posX, widthMask) < image.valueF(posX + stepOffset, widthMask))))
 		{
-			j = posX + minInterval;	// ищем правую границу искомого объекта;
+			j = posX + minInterval;	// ищем правую границу искомого объекта(через экстремуму);
 					while ((j+1-posX<maxInterval)&&(j+1<width))
 					{
-						if (((image.extremum(j - 1, widthMask) < image.extremum(j, widthMask))
-							&& (image.extremum(j, widthMask) > image.extremum(j + 1, widthMask)))
-							|| ((image.extremum(j - 1, widthMask) > image.extremum(j, widthMask))
-								&& (image.extremum(j, widthMask) < image.extremum(j + 1, widthMask))))
+						if (((image.valueF(j - 1, widthMask) < image.valueF(j, widthMask))
+							&& (image.valueF(j, widthMask) > image.valueF(j + 1, widthMask)))
+							|| ((image.valueF(j - 1, widthMask) > image.valueF(j, widthMask))
+								&& (image.valueF(j, widthMask) < image.valueF(j + 1, widthMask))))
+						{
+							cout << " x0 = " << posX << " xEnd = " << j << " записать в файл(y/n)?.. ";
+							char ch;
+							cin >> ch;
 							filtering(image, posX, j);
+							if (ch == 'y')
+								diskOut();
+							//nearestMatch = compareWithBase(MinCD);
+						}
 					}
 		}
 	}
