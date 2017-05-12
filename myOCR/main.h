@@ -21,10 +21,8 @@ protected:
 	unsigned int height;						// высота изображение;
 	unsigned int width;							// ширина изображения;
 public:
-	Image(const int& h, const int& w) : height(h), width(w) // конструктор
-	{
-		pixel = new Pixel[h*w];					// размер ассива определяется размером изображения
-	}	 
+	Image() : height(0), width(0), pixel(0) // конструктор
+	{ }	 
 	~Image()
 	{
 		delete[]pixel;
@@ -35,15 +33,29 @@ public:
 	char putPixel(const unsigned int& numberPix);
 	char& operator [](const unsigned int& numberPix);
 	float valueF(unsigned int posX, const unsigned int& widthMask);
+	int download();
 };
 class Settings						// параметры вводимые пользователем
 {
+private:
+	bool mode;
+	unsigned int widthMask;			// ширина накладываемой маски при поиске экстреммум f1
+	unsigned int stepOffset;		// шаг смещения при поиске экстреммум f1
+	unsigned int minInterval;		// минимальная ширина символа в пикселях
+	unsigned int maxInterval;		// максимальная ширина символа в пикселях
+	float percentOverlay;			// процент наложения
 public:
-	unsigned int widthMask = 4;		// ширина накладываемой маски при поиске экстреммум f1
-	unsigned int stepOffset = 1;	// шаг смещения при поиске экстреммум f1
-	unsigned int minInterval = 3;	// минимальная ширина символа в пикселях
-	unsigned int maxInterval = 5;	// максимальная ширина символа в пикселях
-	float percentOverlay = 100;		// процент наложения 
+	Settings(bool m, int wM, int sO, int minIn, int maxIn, int pO)
+	{
+		mode = m;
+		widthMask = wM;			// ширина накладываемой маски при поиске экстреммум f1
+		stepOffset = sO;		// шаг смещения при поиске экстреммум f1
+		minInterval = minIn;		// минимальная ширина символа в пикселях
+		maxInterval = maxIn;		// максимальная ширина символа в пикселях
+		percentOverlay = pO;
+	}
+	friend class Sample;
+	friend class Strainer;
 };
 class Sample								// находит хранит, и записывает эталоны;
 {

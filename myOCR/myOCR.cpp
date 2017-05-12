@@ -7,14 +7,11 @@
 int main()
 {
 	setlocale(LC_ALL, "Russian");
-	Settings user;
-	unsigned int x0 = 0, xk = 4;
-	Image img(4, 4);
-	for(int i=0; i<16; i++)
-	 img[i] = 1;
+	Settings user(false,4,1,8,35,10);
+	Image img;
+	img.download();
 	Strainer S;
-	S.filtering(img, x0, xk);
-	S.diskOut();
+	S.selection(img, user);
 
 	system("pause");
     return 0;

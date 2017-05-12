@@ -9,7 +9,7 @@ char& Pixel::put()					// передать значение яркости
 {
 	return brightness;
 }
-
+  
 //	методы класса Image
 void Image::getPixel(const unsigned int& numberPix, const char& br)
 {
@@ -238,7 +238,7 @@ void Strainer::selection(Image& image, Settings& user)
 	unsigned int posX = 0;		// текущая позиция по X
 	float MinCD;				// минимальное декартово расстояние
 	char  nearestMatch = 0;		// ближайший эталон
-
+	cout << "selection..." << endl;
 						// внешний цикл обработки. обход по ширине изображения с заданным шагом 
 	for (int i = 0; i <= numberOfSteps; i++)
 	{
@@ -262,8 +262,17 @@ void Strainer::selection(Image& image, Settings& user)
 							filtering(image, posX, j);
 							if (ch == 'y')
 								diskOut();
+							cout << " сместится вправо по X: ";
+							int offset = 0;
+							cin >> offset;
+							if (offset) 
+							{
+								posX = offset;
+								break;
+							}
 							//nearestMatch = compareWithBase(MinCD);
 						}
+						j++;
 					}
 		}
 	}
