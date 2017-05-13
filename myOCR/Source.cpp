@@ -1,33 +1,21 @@
 #include "stdafx.h"
 
 //	методы класса Pixel
-void Pixel::get(const char& br)			// получить значение яркости
+void Pixel::get(const double& br)			// получить значение яркости
 {
-	brightness = br;
+	brightness = static_cast<char>(br);
 }
-char& Pixel::put()					// передать значение яркости
+unsigned char& Pixel::put()					// передать значение яркости
 {
 	return brightness;
 }
   
 //	методы класса Image
-void Image::getPixel(const unsigned int& numberPix, const char& br)
-{
-	if (numberPix > height*width) exit(1);
-	
-	pixel[numberPix].get(br);
-}
-char Image::putPixel(const unsigned int& numberPix)
-{
-	if (numberPix > height*width) exit(1);
-
-	return pixel[numberPix].put();
-}
-unsigned int Image::putHeight()
+unsigned int Image::putHeight()const
 {
 	return height;
 }
-unsigned int Image::putWidth()
+unsigned int Image::putWidth()const
 {
 	return width;
 }
@@ -45,11 +33,22 @@ float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 	}
 	return temp;
 }
-char& Image::operator[](const unsigned int& numberPix)
+unsigned char& Image::operator[](const unsigned int& numberPix)const
 {
 	if (numberPix > height*width) exit(1);
 
 	return pixel[numberPix].put();
+}
+
+//	методы класса Settings
+void Settings::getSettings()
+{
+}
+
+//	методы класса Compliance
+void Compliance::dispay()
+{
+	cout << endl << x0 << ' ' << xEnd << ' ' << nearestMatch << ' ' << CartesianDistance;
 }
 
 //	методы класса Sample
@@ -57,7 +56,7 @@ char Sample::returnMatch()
 {
 	return match;
 }
-void Sample::filtering(Image& image, const unsigned int& x0, const unsigned int& xEnd)
+void Sample::filtering(const Image& image, const unsigned int& x0, const unsigned int& xEnd)
 {
 	unsigned int numberPix = x0;				// начальная координата наложения фильтра
 	unsigned int widthMask = (xEnd - x0) / 4;	// масштабируем фильтр по размеру отрезка
@@ -72,7 +71,7 @@ void Sample::filtering(Image& image, const unsigned int& x0, const unsigned int&
 		{
 			// Накладываем фильтр 0
 			{	
-				Filtered[0] = image[numberPix]; 
+				Filtered[0] += image[numberPix]; 
 			}
 			// Накладываем фильтр 1										
 			{
@@ -188,15 +187,15 @@ void Sample::diskOut()						// Запись в конец файла.
 	outfile.write((char*)this, sizeof(*this));	// Объект записан;
 	outfile.close();	
 }
-float Sample::operator - (Sample& match)
+float Sample::operator - (const Sample& match)
 {
-	long double temp = 0.0;
+	long double tempDC = 0.0;
 	for (int i = 0; i < QF; i++)
 	{
 		double minus = Filtered[i] - match.Filtered[i];
-		temp = minus*minus;
+		tempDC += minus*minus;
 	}
-	return (float)sqrt(temp);
+	return (float)(sqrt(tempDC));
 }
 
 //	методы класса Strainer
@@ -213,11 +212,12 @@ char Strainer::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращае
 	while (!infile.eof()) 
 	{
 		tempCD = *this - tempSample;	// находим декартово расстояние
-		if (!nearestMatch || MinCD > tempCD) // если это первое сравнение или  
+		
+		if (!nearestMatch || MinCD > tempCD)// если это первое сравнение или  
 		{									// предыдущее декартово рсстояние больше
-			MinCD = tempCD;					// сохраняем это как минимальное
+			MinCD = tempCD;					// сохраняем это как минимальное 
 											// запоминаем эталон как наиболее близкий
-			nearestMatch = tempSample.returnMatch(); 
+			nearestMatch = tempSample.returnMatch();
 		}						// считываем значения эталонв из обучающей выборки:
 		infile.read(reinterpret_cast<char*>(&tempSample), sizeof(tempSample));
 	}
@@ -227,6 +227,7 @@ char Strainer::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращае
 void Strainer::selection(Image& image, Settings& user)
 {
 	char way=0;					// направление обхода алгоритма обработки;
+	list<Compliance>::iterator index = compliance.begin();
 								// количество шагов
 	unsigned int width = image.putWidth();
 	unsigned int widthMask = user.widthMask;
@@ -234,7 +235,7 @@ void Strainer::selection(Image& image, Settings& user)
 	unsigned int minInterval = user.minInterval;
 	unsigned int maxInterval = user.maxInterval;
 	int numberOfSteps = ((width - widthMask) / stepOffset);
-	int j = 0;					// индекс циклов обработки
+	unsigned int j = 0;			// индекс циклов обработки
 	unsigned int posX = 0;		// текущая позиция по X
 	float MinCD;				// минимальное декартово расстояние
 	char  nearestMatch = 0;		// ближайший эталон
@@ -249,31 +250,57 @@ void Strainer::selection(Image& image, Settings& user)
 				&& (image.valueF(posX, widthMask) < image.valueF(posX + stepOffset, widthMask))))
 		{
 			j = posX + minInterval;	// ищем правую границу искомого объекта(через экстремуму);
-					while ((j+1-posX<maxInterval)&&(j+1<width))
+			while ((j+1-posX<maxInterval)&&(j+1<width))
+			{
+				if (((image.valueF(j - 1, widthMask) < image.valueF(j, widthMask))
+					&& (image.valueF(j, widthMask) > image.valueF(j + 1, widthMask)))
+					|| ((image.valueF(j - 1, widthMask) > image.valueF(j, widthMask))
+					&& (image.valueF(j, widthMask) < image.valueF(j + 1, widthMask))))
+				{
+					for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
+					filtering(image, posX, j);
+					if (user.mode)
 					{
-						if (((image.valueF(j - 1, widthMask) < image.valueF(j, widthMask))
-							&& (image.valueF(j, widthMask) > image.valueF(j + 1, widthMask)))
-							|| ((image.valueF(j - 1, widthMask) > image.valueF(j, widthMask))
-								&& (image.valueF(j, widthMask) < image.valueF(j + 1, widthMask))))
+						cout << " x0 = " << posX << " xEnd = " << j << " записать в файл(y/n)?.. ";
+						char ch;
+						cin >> ch;
+						if (ch == 'y')
+							diskOut();
+						cout << " сместится вправо по X0(если нет - 0): ";
+						int offset = 0;
+						cin >> offset;
+						if (offset)
 						{
-							cout << " x0 = " << posX << " xEnd = " << j << " записать в файл(y/n)?.. ";
-							char ch;
-							cin >> ch;
-							filtering(image, posX, j);
-							if (ch == 'y')
-								diskOut();
-							cout << " сместится вправо по X: ";
-							int offset = 0;
-							cin >> offset;
-							if (offset) 
-							{
-								posX = offset;
-								break;
-							}
-							//nearestMatch = compareWithBase(MinCD);
+							posX = offset;
+							break;
 						}
-						j++;
 					}
+					else {
+						nearestMatch = compareWithBase(MinCD);
+
+						way = 0;
+						do {
+							switch (way) {
+							case 0: if (index != compliance.begin()) way = 1;
+									else way = 3;								continue;
+							case 1: if ((float((--index)->xEnd - posX) / float(j - posX)) > (user.percentOverlay / 100)) way = 2;
+									else way = 3;								continue;
+							case 2: if (index->CartesianDistance > MinCD) { compliance.pop_back(); way = 3; }
+									else { way = 4;	index = compliance.end(); }	continue;
+							case 3: compliance.push_back(Compliance(posX, j, nearestMatch, MinCD));
+								index = compliance.end(); way = 4;
+							}
+						} while (way != 4);
+					}
+				}
+				j++;
+			}
 		}
 	}
+}
+void Strainer::display()
+{
+	list<Compliance>::iterator iter;
+	for (iter = compliance.begin(); iter != compliance.end(); ++iter)
+		iter->dispay();
 }

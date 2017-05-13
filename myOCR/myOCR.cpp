@@ -12,7 +12,7 @@ int main()
 	img.download();
 	Strainer S;
 	S.selection(img, user);
-
+	S.display();
 	system("pause");
     return 0;
 }

@@ -5,12 +5,12 @@
 class Pixel						// хранит €ркость пиксел€
 {
 private:
-	char brightness;			
+	unsigned char brightness;			
 public:
 	Pixel() : brightness(0)
 	{}
-	void get(const char& br);			// получить значение €ркости
-	char& put();					// передать значение €ркости
+	void get(const double& br);			// получить значение €ркости
+	unsigned char& put();					// передать значение €ркости
 };
 class Image						// хранит изображение в виде массива Pixel;
 {
@@ -27,11 +27,9 @@ public:
 	{
 		delete[]pixel;
 	}
-	unsigned int putHeight();
-	unsigned int putWidth();
-	void getPixel(const unsigned int& numberPix, const char& br);
-	char putPixel(const unsigned int& numberPix);
-	char& operator [](const unsigned int& numberPix);
+	unsigned int putHeight()const;
+	unsigned int putWidth()const;
+	unsigned char& operator [](const unsigned int& numberPix)const;
 	float valueF(unsigned int posX, const unsigned int& widthMask);
 	int download();
 };
@@ -45,7 +43,7 @@ private:
 	unsigned int maxInterval;		// максимальна€ ширина символа в пиксел€х
 	float percentOverlay;			// процент наложени€
 public:
-	Settings(bool m, int wM, int sO, int minIn, int maxIn, int pO)
+	Settings(bool m, int wM, int sO, int minIn, int maxIn, float pO)
 	{
 		mode = m;
 		widthMask = wM;			// ширина накладываемой маски при поиске экстреммум f1
@@ -54,6 +52,7 @@ public:
 		maxInterval = maxIn;		// максимальна€ ширина символа в пиксел€х
 		percentOverlay = pO;
 	}
+	void getSettings();
 	friend class Sample;
 	friend class Strainer;
 };
@@ -72,17 +71,17 @@ public:
 		for (int i = 0; i < QF; i++)Filtered[i] = M[i];
 	}
 	char returnMatch();
-	void filtering(Image& image, const unsigned int& x0, const unsigned int& xEnd);
+	void filtering(const Image& image, const unsigned int& x0, const unsigned int& xEnd);
 	void display();
 	void diskOut();
-	float operator - (Sample& matchFiltred);
+	float operator - (const Sample& matchFiltred);
 };
 class Compliance
 {
 protected:
 	int x0;							// Ќачаольна€ координата искомого объекта;
 	int xEnd;						// конечна€ координата искомого объекта;
-	int nearestMatch;				// номер эталона ближайшего по значению признаков;
+	char nearestMatch;				// номер эталона ближайшего по значению признаков;
 	float CartesianDistance;		// декартово рассто€ние до ближайшего эталона;
 public:
 	Compliance() : x0(0), xEnd(0), nearestMatch(0), CartesianDistance(0.0)
@@ -90,6 +89,8 @@ public:
 	Compliance(int X0, int End, int nM, float CD) :
 		x0(X0), xEnd(End), nearestMatch(nM), CartesianDistance(CD)
 	{ }
+	void dispay();
+	friend class Strainer;
 };
 class Strainer : public Sample		// выборка совпадений
 {
@@ -98,5 +99,6 @@ protected:
 public:
 	char compareWithBase(float& MinCD);
 	void selection(Image& image, Settings& user);
+	void display();
 };
 #endif // !MAINHEAD
