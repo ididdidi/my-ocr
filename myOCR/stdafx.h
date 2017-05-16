@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <list>
 #include <locale>
+//#include <string.h>
 using namespace std;
 
 #include "targetver.h"

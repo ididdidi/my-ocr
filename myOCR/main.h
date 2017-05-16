@@ -2,6 +2,33 @@
 #ifndef MAINHEAD
 #define MAINHEAD
 #define QF 16						// Количество филььров
+class Settings						// параметры вводимые пользователем
+{
+private:
+	bool mode;
+	unsigned int widthMask;			// ширина накладываемой маски при поиске экстреммум f1
+	unsigned int stepOffset;		// шаг смещения при поиске экстреммум f1
+	unsigned int minInterval;		// минимальная ширина символа в пикселях
+	unsigned int maxInterval;		// максимальная ширина символа в пикселях
+	float percentOverlay;			// процент наложения
+	char fileName[40];				// имя файла изображением
+public:
+	Settings(bool m, int wM, int sO, int minIn, int maxIn, float pO, char* fname)
+	{
+
+		mode = m;
+		widthMask = wM;			// ширина накладываемой маски при поиске экстреммум f1
+		stepOffset = sO;		// шаг смещения при поиске экстреммум f1
+		minInterval = minIn;	// минимальная ширина символа в пикселях
+		maxInterval = maxIn;	// максимальная ширина символа в пикселях
+		percentOverlay = pO;
+		strcpy_s(fileName,fname);
+	}
+	void getMode();
+	friend class Image;
+	friend class Sample;
+	friend class Strainer;
+};
 class Pixel						// хранит яркость пикселя
 {
 private:
@@ -21,8 +48,7 @@ protected:
 	unsigned int height;						// высота изображение;
 	unsigned int width;							// ширина изображения;
 public:
-	Image() : height(0), width(0), pixel(0) // конструктор
-	{ }	 
+	Image(Settings& user);						// конструктор
 	~Image()
 	{
 		delete[]pixel;
@@ -31,30 +57,6 @@ public:
 	unsigned int putWidth()const;
 	unsigned char& operator [](const unsigned int& numberPix)const;
 	float valueF(unsigned int posX, const unsigned int& widthMask);
-	int download();
-};
-class Settings						// параметры вводимые пользователем
-{
-private:
-	bool mode;
-	unsigned int widthMask;			// ширина накладываемой маски при поиске экстреммум f1
-	unsigned int stepOffset;		// шаг смещения при поиске экстреммум f1
-	unsigned int minInterval;		// минимальная ширина символа в пикселях
-	unsigned int maxInterval;		// максимальная ширина символа в пикселях
-	float percentOverlay;			// процент наложения
-public:
-	Settings(bool m, int wM, int sO, int minIn, int maxIn, float pO)
-	{
-		mode = m;
-		widthMask = wM;			// ширина накладываемой маски при поиске экстреммум f1
-		stepOffset = sO;		// шаг смещения при поиске экстреммум f1
-		minInterval = minIn;		// минимальная ширина символа в пикселях
-		maxInterval = maxIn;		// максимальная ширина символа в пикселях
-		percentOverlay = pO;
-	}
-	void getSettings();
-	friend class Sample;
-	friend class Strainer;
 };
 class Sample								// находит хранит, и записывает эталоны;
 {
@@ -97,6 +99,10 @@ class Strainer : public Sample		// выборка совпадений
 protected:
 	list<Compliance> compliance;
 public:
+	Strainer(Image& image, Settings& user)
+	{
+		selection(image, user);
+	}
 	char compareWithBase(float& MinCD);
 	void selection(Image& image, Settings& user);
 	void display();

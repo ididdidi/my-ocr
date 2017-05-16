@@ -1,17 +1,14 @@
 #include "stdafx.h"
 
-int Image::download()
+Image::Image(Settings& user)
 {
-	std::cout << "Enter the name of the import file... ";
-	char name[40];
-	std::cin >> name;
-	char *fileName = name;
+	char *fileName = user.fileName;
 
 	// открываем файл
 	std::ifstream fileStream(fileName, std::ifstream::binary);
 	if (!fileStream) {
 		std::cout << "Error opening file '" << fileName << "'." << std::endl;
-		return 0;
+		return;
 	}
 
 	// заголовк изображени€
@@ -24,7 +21,7 @@ int Image::download()
 
 	if (fileHeader.bfType != 0x4D42) {
 		std::cout << "Error: '" << fileName << "' is not BMP file." << std::endl;
-		return 0;
+		return;
 	}
 
 	// информаци€ изображени€
@@ -105,17 +102,17 @@ int Image::download()
 	if (fileInfoHeader.biSize != 12 && fileInfoHeader.biSize != 40 && fileInfoHeader.biSize != 52 &&
 		fileInfoHeader.biSize != 56 && fileInfoHeader.biSize != 108 && fileInfoHeader.biSize != 124) {
 		std::cout << "Error: Unsupported BMP format." << std::endl;
-		return 0;
+		return;
 	}
 
 	if (fileInfoHeader.biBitCount != 16 && fileInfoHeader.biBitCount != 24 && fileInfoHeader.biBitCount != 32) {
 		std::cout << "Error: Unsupported BMP bit count." << std::endl;
-		return 0;
+		return;
 	}
 
 	if (fileInfoHeader.biCompression != 0 && fileInfoHeader.biCompression != 3) {
 		std::cout << "Error: Unsupported BMP compression." << std::endl;
-		return 0;
+		return;
 	}
 
 	// rgb info
@@ -159,7 +156,7 @@ int Image::download()
 			pixel[k++].get(0.3*rgbInfo[i][j].rgbRed + 0.59*rgbInfo[i][j].rgbGreen + 0.11*rgbInfo[i][j].rgbBlue);
 		}
 	}
-return 0;
+return;
 }
 
 unsigned char bitextract(const unsigned int byte, const unsigned int mask) {
@@ -179,12 +176,4 @@ unsigned char bitextract(const unsigned int byte, const unsigned int mask) {
 
 	// применение маски и смещение
 	return (byte & mask) >> maskPadding;
-}
-
-int hex_to_dec(int hex)
-{
-	int dec = 0;
-	dec = (int)(hex / 16) * 10;
-	dec += hex % 16;
-	return dec;
 }

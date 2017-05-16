@@ -41,8 +41,14 @@ unsigned char& Image::operator[](const unsigned int& numberPix)const
 }
 
 //	методы класса Settings
-void Settings::getSettings()
+void Settings::getMode()
 {
+	char ch;
+	do{ 
+		cout << "Выберете режим обучение(t) или обработка(p)";
+		cin >> ch;
+	} while (ch != 't' || ch != 'p' || ch != 'T' || ch != 'P' );
+	(ch == 't' || ch == 'T') ? mode = true : mode = false;
 }
 
 //	методы класса Compliance
