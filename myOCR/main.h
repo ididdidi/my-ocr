@@ -48,7 +48,7 @@ protected:
 	unsigned int height;						// высота изображение;
 	unsigned int width;							// ширина изображения;
 public:
-	Image(Settings& user);						// конструктор
+	Image(Settings& user); // >> >> >> download.cpp						// конструктор
 	~Image()
 	{
 		delete[]pixel;

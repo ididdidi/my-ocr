@@ -1,3 +1,5 @@
+// Содержит метод = конструктор класса Image для загрузки изображения  
+
 #include "stdafx.h"
 
 Image::Image(Settings& user)

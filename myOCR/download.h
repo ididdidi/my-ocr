@@ -1,3 +1,5 @@
+// заголовочный файл для метода загрузки изображения
+
 #pragma once
 #ifndef DOWNLOAD_INCLUDED
 #define DOWNLOAD_INCLUDED
