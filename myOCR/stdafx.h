@@ -5,10 +5,20 @@
 
 #pragma once
 
-#include "targetver.h"
-
 #include <stdio.h>
 #include <tchar.h>
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <list>
+#include <locale>
+//#include <string.h>
+using namespace std;
+
+#include "targetver.h"
+#include "download.h"		// заголовочный файл для метода загрузки изображения
+#include "main.h"
 
 
 
