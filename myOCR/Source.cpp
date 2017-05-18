@@ -177,12 +177,6 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 		numberPix += width - widthMask;
 	}
 }
-void Sample::display()
-{
-	cout << endl << match << '|';
-	for (int i = 0; i < QF; i++)
-		cout << setw(7) << Filtered[i];
-}
 void Sample::diskOut()						// Запись в конец файла.
 {
 		cout << " Запись эталона в базу";

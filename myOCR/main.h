@@ -74,7 +74,6 @@ public:
 	}
 	char returnMatch();
 	void filtering(const Image& image, const unsigned int& x0, const unsigned int& xEnd);
-	void display();
 	void diskOut();
 	float operator - (const Sample& matchFiltred);
 };

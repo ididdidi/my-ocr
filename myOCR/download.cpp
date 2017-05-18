@@ -117,35 +117,15 @@ Image::Image(Settings& user)
 		return;
 	}
 
-	// rgb info
-	RGBQUAD **rgbInfo = new RGBQUAD*[fileInfoHeader.biHeight];
+	// сохранение данных в классе Image
+	unsigned int bufer;
 
-	for (unsigned int i = 0; i < fileInfoHeader.biHeight; i++) {
-		rgbInfo[i] = new RGBQUAD[fileInfoHeader.biWidth];
-	}
+	height = fileInfoHeader.biHeight;
+	width = fileInfoHeader.biWidth;
 
 	// определение размера отступа в конце каждой строки
 	int linePadding = ((fileInfoHeader.biWidth * (fileInfoHeader.biBitCount / 8)) % 4) & 3;
 
-	// чтение
-	unsigned int bufer;
-
-	for (unsigned int i = 0; i < fileInfoHeader.biHeight; i++) {
-		for (unsigned int j = 0; j < fileInfoHeader.biWidth; j++) {
-			read(fileStream, bufer, fileInfoHeader.biBitCount / 8);
-
-			rgbInfo[i][j].rgbRed = bitextract(bufer, fileInfoHeader.biRedMask);
-			rgbInfo[i][j].rgbGreen = bitextract(bufer, fileInfoHeader.biGreenMask);
-			rgbInfo[i][j].rgbBlue = bitextract(bufer, fileInfoHeader.biBlueMask);
-			rgbInfo[i][j].rgbReserved = bitextract(bufer, fileInfoHeader.biAlphaMask);
-		}
-		fileStream.seekg(linePadding, std::ios_base::cur);
-	}
-
-	// сохранение данных в классе Image
-
-	height = fileInfoHeader.biHeight;
-	width = fileInfoHeader.biWidth;
 	if (!(height*width)) exit(2);
 	if (pixel) 
 	{
@@ -155,8 +135,11 @@ Image::Image(Settings& user)
 	unsigned int k = 0;
 	for (unsigned int i = 0; i < fileInfoHeader.biHeight; i++) {
 		for (unsigned int j = 0; j < fileInfoHeader.biWidth; j++) {
-			pixel[k++].get(0.3*rgbInfo[i][j].rgbRed + 0.59*rgbInfo[i][j].rgbGreen + 0.11*rgbInfo[i][j].rgbBlue);
+			read(fileStream, bufer, fileInfoHeader.biBitCount / 8);
+
+			pixel[k++].get(0.3* bitextract(bufer, fileInfoHeader.biRedMask) + 0.59*bitextract(bufer, fileInfoHeader.biGreenMask) + 0.11*bitextract(bufer, fileInfoHeader.biBlueMask));
 		}
+		fileStream.seekg(linePadding, std::ios_base::cur);
 	}
 return;
 }

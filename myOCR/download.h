@@ -56,14 +56,6 @@ typedef struct {
 	unsigned int   biReserved;
 } BITMAPINFOHEADER;
 
-// rgb quad
-typedef struct {
-	unsigned char  rgbBlue;
-	unsigned char  rgbGreen;
-	unsigned char  rgbRed;
-	unsigned char  rgbReserved;
-} RGBQUAD;
-
 // read bytes
 template <typename Type>
 void read(std::ifstream &fp, Type &result, std::size_t size) {
