@@ -133,13 +133,21 @@ Image::Image(Settings& user)
 	}
 	pixel = new Pixel[height*width];
 	unsigned int k = 0;
-	for (unsigned int i = 0; i < fileInfoHeader.biHeight; i++) {
-		for (unsigned int j = 0; j < fileInfoHeader.biWidth; j++) {
-			read(fileStream, bufer, fileInfoHeader.biBitCount / 8);
+	int i = 0;
+	unsigned int j = 0;
 
-			pixel[k++].get(0.3* bitextract(bufer, fileInfoHeader.biRedMask) + 0.59*bitextract(bufer, fileInfoHeader.biGreenMask) + 0.11*bitextract(bufer, fileInfoHeader.biBlueMask));
+#pragma omp parallel num_threads(2) shared(k)
+	{
+#pragma omp for schedule (guided) firstprivate(j) lastprivate(i) ordered
+		for (i = 0; i < fileInfoHeader.biHeight; i++) {
+#pragma omp ordered
+			for (j = 0; j < fileInfoHeader.biWidth; j++, k++) {
+				read(fileStream, bufer, fileInfoHeader.biBitCount / 8);
+
+				pixel[k].get(0.3* bitextract(bufer, fileInfoHeader.biRedMask) + 0.59*bitextract(bufer, fileInfoHeader.biGreenMask) + 0.11*bitextract(bufer, fileInfoHeader.biBlueMask));
+			}
+			fileStream.seekg(linePadding, std::ios_base::cur);
 		}
-		fileStream.seekg(linePadding, std::ios_base::cur);
 	}
 return;
 }
