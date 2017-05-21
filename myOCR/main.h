@@ -75,6 +75,7 @@ public:
 	char returnMatch();
 	void filtering(const Image& image, const unsigned int& x0, const unsigned int& xEnd);
 	void diskOut();
+	char compareWithBase(float& MinCD);
 	float operator - (const Sample& matchFiltred);
 };
 class Compliance
@@ -90,6 +91,10 @@ public:
 	Compliance(int X0, int End, int nM, float CD) :
 		x0(X0), xEnd(End), nearestMatch(nM), CartesianDistance(CD)
 	{ }
+	bool operator < (const Compliance& rhs)
+	{
+		return x0 < rhs.x0;
+	}
 	void dispay();
 	friend class Strainer;
 };
@@ -102,8 +107,8 @@ public:
 	{
 		selection(image, user);
 	}
-	char compareWithBase(float& MinCD);
 	void selection(Image& image, Settings& user);
+	void minimize(Settings& user);
 	void display();
 };
 #endif // !MAINHEAD

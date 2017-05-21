@@ -136,7 +136,7 @@ Image::Image(Settings& user)
 	int i = 0;
 	unsigned int j = 0;
 
-#pragma omp parallel num_threads(2) shared(k)
+#pragma omp parallel num_threads(omp_get_max_threads()/2) shared(k)
 	{
 #pragma omp for schedule (guided) firstprivate(j) lastprivate(i) ordered
 		for (i = 0; i < fileInfoHeader.biHeight; i++) {

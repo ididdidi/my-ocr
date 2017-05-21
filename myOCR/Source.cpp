@@ -199,7 +199,7 @@ float Sample::operator - (const Sample& match)
 }
 
 //	методы класса Strainer
-char Strainer::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращает ближайший
+char Sample::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращает ближайший
 {											 // и рассто€ние до него(&MinCD);
 	char  nearestMatch = 0;
 	float tempCD;				// текущее значение декартовова рассто€ни€
@@ -226,31 +226,32 @@ char Strainer::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращае
 }
 void Strainer::selection(Image& image, Settings& user)
 {
-	char way=0;					// направление обхода алгоритма обработки;
-	list<Compliance>::iterator index = compliance.begin();
-								// количество шагов
+									// количество шагов
 	unsigned int width = image.putWidth();
 	unsigned int widthMask = user.widthMask;
 	unsigned int stepOffset = user.stepOffset;
 	unsigned int minInterval = user.minInterval;
 	unsigned int maxInterval = user.maxInterval;
-	int numberOfSteps = ((width - widthMask) / stepOffset);
 	unsigned int j = 0;			// индекс циклов обработки
-	unsigned int posX = 0;		// текуща€ позици€ по X
+	int posX = 0;		// текуща€ позици€ по X
 	float MinCD;				// минимальное декартово рассто€ние
 	char  nearestMatch = 0;		// ближайший эталон
 	cout << "selection..." << endl;
 						// внешний цикл обработки. обход по ширине изображени€ с заданным шагом 
-	for (int i = 0; i <= numberOfSteps; i++)
+	omp_lock_t lock;
+	omp_init_lock(&lock);
+#pragma omp parallel num_threads(1) shared(stepOffset)
 	{
-		posX += stepOffset;	// ищем левую границу искомого объекта(через экстремуму)
+#pragma omp for schedule (guided) private(MinCD) firstprivate(nearestMatch,j) lastprivate(posX)
+	for (posX = stepOffset; posX < width - widthMask; posX += stepOffset)
+	{
 		if (((image.valueF(posX - stepOffset, widthMask) < image.valueF(posX, widthMask))
 			&& (image.valueF(posX, widthMask) > image.valueF(posX + stepOffset, widthMask)))
 			|| ((image.valueF(posX - stepOffset, widthMask) > image.valueF(posX, widthMask))
 				&& (image.valueF(posX, widthMask) < image.valueF(posX + stepOffset, widthMask))))
 		{
 			j = posX + minInterval;	// ищем правую границу искомого объекта(через экстремуму);
-			while ((j+1-posX<maxInterval)&&(j+1<width))
+			while ((j + 1 - posX < maxInterval) && (j + 1 < width))
 			{
 				if (((image.valueF(j - 1, widthMask) < image.valueF(j, widthMask))
 					&& (image.valueF(j, widthMask) > image.valueF(j + 1, widthMask)))
@@ -258,8 +259,9 @@ void Strainer::selection(Image& image, Settings& user)
 					&& (image.valueF(j, widthMask) < image.valueF(j + 1, widthMask))))
 				{
 					for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
-					filtering(image, posX, j);
-					if (user.mode)
+					Sample temp;
+					temp.filtering(image, posX, j);
+				/*	if (user.mode)
 					{
 						cout << " x0 = " << posX << " xEnd = " << j << " записать в файл(y/n)?.. ";
 						char ch;
@@ -275,29 +277,51 @@ void Strainer::selection(Image& image, Settings& user)
 							break;
 						}
 					}
-					else {
-						nearestMatch = compareWithBase(MinCD);
-
-						way = 0;
-						do {
-							switch (way) {
-							case 0: if (index != compliance.begin()) way = 1;
-									else way = 3;								continue;
-							case 1: if ((float((--index)->xEnd - posX) / float(j - posX)) > (user.percentOverlay / 100)) way = 2;
-									else way = 3;								continue;
-							case 2: if (index->CartesianDistance > MinCD) { compliance.pop_back(); way = 3; }
-									else { way = 4;	index = compliance.end(); }	continue;
-							case 3: compliance.push_back(Compliance(posX, j, nearestMatch, MinCD));
-								index = compliance.end(); way = 4;
-							}
-						} while (way != 4);
+					else */{
+						nearestMatch = temp.compareWithBase(MinCD);
+						omp_set_lock(&lock);
+						compliance.push_back(Compliance(posX, j, nearestMatch, MinCD));
+						omp_unset_lock(&lock);
 					}
 				}
 				j++;
 			}
 		}
 	}
+    }
+	omp_destroy_lock(&lock);
 }
+
+void Strainer::minimize(Settings& user)
+{
+	compliance.sort();
+	list<Compliance>::iterator  iterLeft, iterRight;
+	iterLeft = compliance.begin();
+	iterRight = compliance.begin();
+	iterRight++;
+
+	for (; iterRight != compliance.end();)
+	{
+		float layering = (iterLeft->xEnd - iterRight->x0);
+		float minW = (((iterLeft->xEnd - iterLeft->x0) < (iterRight->xEnd - iterRight->x0)) ? (iterLeft->xEnd - iterLeft->x0) : (iterRight->xEnd - iterRight->x0));
+		if(layering / minW > (user.percentOverlay / 100))
+			if (iterLeft->CartesianDistance > iterRight->CartesianDistance)
+			{
+				iterLeft = compliance.erase(iterLeft);
+				iterRight++;
+			}
+			else
+			{
+				iterRight = compliance.erase(iterRight);
+			}
+		else
+		{
+			iterLeft = iterRight;
+			iterRight++;
+		}
+	}
+}
+
 void Strainer::display()
 {
 	list<Compliance>::iterator iter;
