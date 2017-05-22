@@ -39,6 +39,13 @@ unsigned char& Image::operator[](const unsigned int& numberPix)const
 
 	return pixel[numberPix].put();
 }
+bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask)
+{
+	return (((valueF(posX - stepOffset, widthMask) < valueF(posX, widthMask))
+		&& (valueF(posX, widthMask) > valueF(posX + stepOffset, widthMask)))
+		|| ((valueF(posX - stepOffset, widthMask) > valueF(posX, widthMask))
+			&& (valueF(posX, widthMask) < valueF(posX + stepOffset, widthMask))));
+}
 
 //	методы класса Settings
 void Settings::getMode()
@@ -240,25 +247,20 @@ void Strainer::selection(Image& image, Settings& user)
 						// внешний цикл обработки. обход по ширине изображения с заданным шагом 
 	omp_lock_t lock;
 	omp_init_lock(&lock);
-#pragma omp parallel num_threads(1) shared(stepOffset)
+	int dinamic_threads = omp_get_dynamic();
+	omp_set_dynamic(1);
+#pragma omp parallel shared(stepOffset)
 	{
 #pragma omp for schedule (guided) private(MinCD) firstprivate(nearestMatch,j) lastprivate(posX)
 	for (posX = stepOffset; posX < width - widthMask; posX += stepOffset)
 	{
-		if (((image.valueF(posX - stepOffset, widthMask) < image.valueF(posX, widthMask))
-			&& (image.valueF(posX, widthMask) > image.valueF(posX + stepOffset, widthMask)))
-			|| ((image.valueF(posX - stepOffset, widthMask) > image.valueF(posX, widthMask))
-				&& (image.valueF(posX, widthMask) < image.valueF(posX + stepOffset, widthMask))))
+		if (image.extremum(posX,stepOffset,widthMask))
 		{
 			j = posX + minInterval;	// ищем правую границу искомого объекта(через экстремуму);
 			while ((j + 1 - posX < maxInterval) && (j + 1 < width))
 			{
-				if (((image.valueF(j - 1, widthMask) < image.valueF(j, widthMask))
-					&& (image.valueF(j, widthMask) > image.valueF(j + 1, widthMask)))
-					|| ((image.valueF(j - 1, widthMask) > image.valueF(j, widthMask))
-					&& (image.valueF(j, widthMask) < image.valueF(j + 1, widthMask))))
+				if (image.extremum(j, 1, widthMask))
 				{
-					for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
 					Sample temp;
 					temp.filtering(image, posX, j);
 				/*	if (user.mode)
@@ -289,6 +291,7 @@ void Strainer::selection(Image& image, Settings& user)
 		}
 	}
     }
+	omp_set_dynamic(dinamic_threads);
 	omp_destroy_lock(&lock);
 }
 

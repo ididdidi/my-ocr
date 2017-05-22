@@ -57,6 +57,7 @@ public:
 	unsigned int putWidth()const;
 	unsigned char& operator [](const unsigned int& numberPix)const;
 	float valueF(unsigned int posX, const unsigned int& widthMask);
+	bool extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask);
 };
 class Sample								// находит хранит, и записывает эталоны;
 {
@@ -98,7 +99,7 @@ public:
 	void dispay();
 	friend class Strainer;
 };
-class Strainer : public Sample		// выборка совпадений
+class Strainer //: public Sample		// выборка совпадений
 {
 protected:
 	list<Compliance> compliance;
