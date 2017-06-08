@@ -7,12 +7,18 @@
 int main()
 {
 	setlocale(LC_ALL, "Russian");
-
-	Settings user(false,4,1,8,35,10,"01.bmp");
+	bool mode = true;
+	Settings user(4,1,8,35,10,"01.bmp");
 	Image img(user);
-	Strainer S(img, user);
-	S.minimize(user);
-	S.display();
+	if (mode){
+		Sample smpl;
+		smpl.training(img, user);
+	}
+	else{
+		Strainer S(img, user);
+		S.minimize(user);
+		S.display();
+	}
 	
 	system("pause");
     return 0;

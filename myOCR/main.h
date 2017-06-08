@@ -5,7 +5,6 @@
 class Settings						// параметры вводимые пользователем
 {
 private:
-	bool mode;
 	unsigned int widthMask;			// ширина накладываемой маски при поиске экстреммум f1
 	unsigned int stepOffset;		// шаг смещения при поиске экстреммум f1
 	unsigned int minInterval;		// минимальная ширина символа в пикселях
@@ -13,10 +12,8 @@ private:
 	float percentOverlay;			// процент наложения
 	char fileName[40];				// имя файла изображением
 public:
-	Settings(bool m, int wM, int sO, int minIn, int maxIn, float pO, char* fname)
+	Settings(int wM, int sO, int minIn, int maxIn, float pO, char* fname)
 	{
-
-		mode = m;
 		widthMask = wM;			// ширина накладываемой маски при поиске экстреммум f1
 		stepOffset = sO;		// шаг смещения при поиске экстреммум f1
 		minInterval = minIn;	// минимальная ширина символа в пикселях
@@ -72,15 +69,13 @@ public:
 	{
 		for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
 	}
-	Sample(float M[QF])
-	{
-		for (int i = 0; i < QF; i++)Filtered[i] = M[i];
-	}
 	char returnMatch();
 	void filtering(const Image& image, const unsigned int& x0, const unsigned int& xEnd);
 	void diskOut();
 	char compareWithBase(float& MinCD);
 	float operator - (const Sample& matchFiltred);
+	void training(Image& image, Settings& user);
+
 };
 
 class Compliance
@@ -113,7 +108,6 @@ public:
 	{
 		selection(image, user);
 	}
-	void training(Image& image, Settings& user);
 	void selection(Image& image, Settings& user);
 	void minimize(Settings& user);
 	void display();

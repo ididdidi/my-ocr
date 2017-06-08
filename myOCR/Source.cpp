@@ -239,39 +239,59 @@ char Sample::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращает 
 	return nearestMatch;		// вернём ближайший эталон
 }
 
-//	методы класса Strainer
-void Strainer::training(Image& image, Settings& user)
+void Sample::training(Image& image, Settings& user)
 {
 	// количество шагов
 	unsigned int width = image.putWidth();
-	unsigned int j = 0;			// правая граница исследуемого сегмента
-	int posX = 0;				// текущая позиция по X
-	float MinCD;				// минимальное декартово расстояние
-	char  nearestMatch = 0;		// ближайший эталон
-	cout << "selection..." << endl;
-	// внешний цикл обработки. обход по ширине изображения с заданным шагом 
+	unsigned int rightEdge = 0;			// правая граница исследуемого сегмента
+	unsigned int leftEdge = 0;				// текущая позиция по X
 
-		for (posX = user.stepOffset; posX < width - user.widthMask; posX += user.stepOffset)
+	char resume;
+	do {
+		do {
+			cout << "Enter the left character border...";
+			cin >> leftEdge;
+		} while (leftEdge > (width - user.widthMask) || leftEdge < 0);
+		do {
+			cout << "Enter the right character border...";
+			cin >> rightEdge;
+		} while ((rightEdge - leftEdge) < user.minInterval || rightEdge < width || (rightEdge - leftEdge) < user.maxInterval);
+
+		char ch = 0;
+		// внешний цикл обработки. обход по ширине изображения с заданным шагом 
+		for (leftEdge = user.stepOffset; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
 		{
-			if (image.extremum(posX, user.stepOffset, user.widthMask))
+			if (ch == 'y' || ch == 'Y')
+				break;
+			if (image.extremum(leftEdge, user.stepOffset, user.widthMask))
 			{
-				j = posX + user.maxInterval;	// ищем правую границу искомого объекта(через экстремуму);
-				while ((j - posX > user.minInterval) && (j < width))
+				// ищем правую границу искомого объекта(через экстремуму);
+				while ((rightEdge - leftEdge > user.minInterval) && (rightEdge < width))
 				{
-					if (image.extremum(j, 1, user.widthMask))
+					if (image.extremum(rightEdge, 1, user.widthMask))
 					{
-						Sample temp;
-						temp.filtering(image, posX, j);
 
-
-						
+						cout << "The actual border: l = " << leftEdge << "r = " << rightEdge;
+						cout << "To preserve the value found(y/n)? ";
+						cin >> ch;
+						if (ch == 'y' || ch == 'Y')
+						{
+							for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
+							filtering(image, leftEdge, rightEdge);
+							diskOut();
+							break;
+						}
 					}
-					j--;
+					rightEdge--;
 				}
 			}
 		}
+		cout << "Continue entering(y/n)? ";
+		resume = _getch();
+	} while (resume == 'y' || resume == 'Y');
 }
 
+//	методы класса Strainer
 void Strainer::selection(Image& image, Settings& user)
 {
 									// количество шагов
