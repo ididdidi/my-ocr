@@ -53,15 +53,7 @@ bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned in
 }
 
 //	методы класса Settings
-void Settings::getMode()
-{
-	char ch;
-	do{ 
-		cout << "Выберете режим обучение(t) или обработка(p)";
-		cin >> ch;
-	} while (ch != 't' || ch != 'p' || ch != 'T' || ch != 'P' );
-	(ch == 't' || ch == 'T') ? mode = true : mode = false;
-}
+
 
 //	методы класса Compliance
 void Compliance::dispay()
@@ -193,8 +185,8 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 
 void Sample::diskOut()						// Запись в конец файла.
 {
-		cout << " Запись эталона в базу";
-	cout << " Введите символ... ";  cin >> match;
+		cout << "\tRecord a sample in the database";
+	cout << "\t\tEnter the symbol... ";  cin >> match;
 
 	ofstream outfile;						// созадан поток вывода
 	outfile.open("MatchBase.dat", ios::app | ios::out | ios::binary); // открыть для записи
@@ -249,29 +241,27 @@ void Sample::training(Image& image, Settings& user)
 	char resume;
 	do {
 		do {
-			cout << "Enter the left character border...";
+			cout << "\nEnter the left character border...";
 			cin >> leftEdge;
 		} while (leftEdge > (width - user.widthMask) || leftEdge < 0);
 		do {
 			cout << "Enter the right character border...";
 			cin >> rightEdge;
-		} while ((rightEdge - leftEdge) < user.minInterval || rightEdge < width || (rightEdge - leftEdge) < user.maxInterval);
+		} while ((rightEdge - leftEdge) < user.minInterval || rightEdge > width || (rightEdge - leftEdge) > user.maxInterval);
 
 		char ch = 0;
 		// внешний цикл обработки. обход по ширине изображения с заданным шагом 
-		for (leftEdge = user.stepOffset; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
+		for ( ; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
 		{
-			if (ch == 'y' || ch == 'Y')
-				break;
 			if (image.extremum(leftEdge, user.stepOffset, user.widthMask))
 			{
 				// ищем правую границу искомого объекта(через экстремуму);
-				while ((rightEdge - leftEdge > user.minInterval) && (rightEdge < width))
+				while ((rightEdge - leftEdge > user.minInterval) && (rightEdge < width) && rightEdge > leftEdge)
 				{
 					if (image.extremum(rightEdge, 1, user.widthMask))
 					{
 
-						cout << "The actual border: l = " << leftEdge << "r = " << rightEdge;
+						cout << "The actual border: l = " << leftEdge << " r = " << rightEdge;
 						cout << "To preserve the value found(y/n)? ";
 						cin >> ch;
 						if (ch == 'y' || ch == 'Y')
@@ -285,6 +275,8 @@ void Sample::training(Image& image, Settings& user)
 					rightEdge--;
 				}
 			}
+			if (ch == 'y' || ch == 'Y')
+				break;
 		}
 		cout << "Continue entering(y/n)? ";
 		resume = _getch();
@@ -369,4 +361,5 @@ void Strainer::display()
 	list<Compliance>::iterator iter;
 	for (iter = compliance.begin(); iter != compliance.end(); ++iter)
 		iter->dispay();
+	cout << endl;
 }
