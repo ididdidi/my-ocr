@@ -5,6 +5,7 @@ void Pixel::get(const double& br)			// получить значение яркости
 {
 	brightness = static_cast<char>(br);
 }
+
 unsigned char& Pixel::put()					// передать значение яркости
 {
 	return brightness;
@@ -15,10 +16,12 @@ unsigned int Image::putHeight()const
 {
 	return height;
 }
+
 unsigned int Image::putWidth()const
 {
 	return width;
 }
+
 float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 {
 	float temp = 0.0;
@@ -33,12 +36,14 @@ float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 	}
 	return temp;
 }
+
 unsigned char& Image::operator[](const unsigned int& numberPix)const
 {
 	if (numberPix > height*width) exit(1);
 
 	return pixel[numberPix].put();
 }
+
 bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask)
 {
 	return (((valueF(posX - stepOffset, widthMask) < valueF(posX, widthMask))
@@ -69,6 +74,7 @@ char Sample::returnMatch()
 {
 	return match;
 }
+
 void Sample::filtering(const Image& image, const unsigned int& x0, const unsigned int& xEnd)
 {
 	unsigned int numberPix = x0;				// начальная координата наложения фильтра
@@ -184,6 +190,7 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 		numberPix += width - widthMask;
 	}
 }
+
 void Sample::diskOut()						// Запись в конец файла.
 {
 		cout << " Запись эталона в базу";
@@ -194,6 +201,7 @@ void Sample::diskOut()						// Запись в конец файла.
 	outfile.write((char*)this, sizeof(*this));	// Объект записан;
 	outfile.close();	
 }
+
 float Sample::operator - (const Sample& match)
 {
 	long double tempDC = 0.0;
@@ -205,7 +213,6 @@ float Sample::operator - (const Sample& match)
 	return (float)(sqrt(tempDC));
 }
 
-//	методы класса Strainer
 char Sample::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращает ближайший
 {											 // и расстояние до него(&MinCD);
 	char  nearestMatch = 0;
@@ -214,12 +221,12 @@ char Sample::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращает 
 	fstream infile;				// открыть поток ввода из файла;
 	infile.open("MatchBase.dat", ios::in | ios::binary);
 	if (!infile) exit(3);
-								// считываем значения эталонв из обучающей выборки:
+	// считываем значения эталонв из обучающей выборки:
 	infile.read(reinterpret_cast<char*>(&tempSample), sizeof(tempSample));
-	while (!infile.eof()) 
+	while (!infile.eof())
 	{
 		tempCD = *this - tempSample;	// находим декартово расстояние
-		
+
 		if (!nearestMatch || MinCD > tempCD)// если это первое сравнение или  
 		{									// предыдущее декартово рсстояние больше
 			MinCD = tempCD;					// сохраняем это как минимальное 
@@ -231,6 +238,40 @@ char Sample::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращает 
 	infile.close();
 	return nearestMatch;		// вернём ближайший эталон
 }
+
+//	методы класса Strainer
+void Strainer::training(Image& image, Settings& user)
+{
+	// количество шагов
+	unsigned int width = image.putWidth();
+	unsigned int j = 0;			// правая граница исследуемого сегмента
+	int posX = 0;				// текущая позиция по X
+	float MinCD;				// минимальное декартово расстояние
+	char  nearestMatch = 0;		// ближайший эталон
+	cout << "selection..." << endl;
+	// внешний цикл обработки. обход по ширине изображения с заданным шагом 
+
+		for (posX = user.stepOffset; posX < width - user.widthMask; posX += user.stepOffset)
+		{
+			if (image.extremum(posX, user.stepOffset, user.widthMask))
+			{
+				j = posX + user.maxInterval;	// ищем правую границу искомого объекта(через экстремуму);
+				while ((j - posX > user.minInterval) && (j < width))
+				{
+					if (image.extremum(j, 1, user.widthMask))
+					{
+						Sample temp;
+						temp.filtering(image, posX, j);
+
+
+						
+					}
+					j--;
+				}
+			}
+		}
+}
+
 void Strainer::selection(Image& image, Settings& user)
 {
 									// количество шагов
@@ -259,28 +300,10 @@ void Strainer::selection(Image& image, Settings& user)
 				{
 					Sample temp;
 					temp.filtering(image, posX, j);
-				/*	if (user.mode)
-					{
-						cout << " x0 = " << posX << " xEnd = " << j << " записать в файл(y/n)?.. ";
-						char ch;
-						cin >> ch;
-						if (ch == 'y')
-							temp.diskOut();
-						cout << " сместится вправо по X0(если нет - 0): ";
-						int offset = 0;
-						cin >> offset;
-						if (offset)
-						{
-							posX = offset;
-							break;
-						}
-					}
-					else */{
-						nearestMatch = temp.compareWithBase(MinCD);
-						omp_set_lock(&lock);
-						compliance.push_back(Compliance(posX, j, nearestMatch, MinCD));
-						omp_unset_lock(&lock);
-					}
+					nearestMatch = temp.compareWithBase(MinCD);
+					omp_set_lock(&lock);
+					compliance.push_back(Compliance(posX, j, nearestMatch, MinCD));
+					omp_unset_lock(&lock);
 				}
 				j--;
 			}

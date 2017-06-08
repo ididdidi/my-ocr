@@ -1,7 +1,7 @@
 #pragma once
 #ifndef MAINHEAD
 #define MAINHEAD
-#define QF 16						//  оличество филььров
+#define QF 16						//  оличество фильров
 class Settings						// параметры вводимые пользователем
 {
 private:
@@ -29,6 +29,7 @@ public:
 	friend class Sample;
 	friend class Strainer;
 };
+
 class Pixel						// хранит €ркость пиксел€
 {
 private:
@@ -39,6 +40,7 @@ public:
 	void get(const double& br);			// получить значение €ркости
 	unsigned char& put();					// передать значение €ркости
 };
+
 class Image						// хранит изображение в виде массива Pixel;
 {
 private:
@@ -59,6 +61,7 @@ public:
 	float valueF(unsigned int posX, const unsigned int& widthMask);
 	bool extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask);
 };
+
 class Sample								// находит хранит, и записывает эталоны;
 {
 protected:
@@ -79,6 +82,7 @@ public:
 	char compareWithBase(float& MinCD);
 	float operator - (const Sample& matchFiltred);
 };
+
 class Compliance
 {
 protected:
@@ -99,6 +103,7 @@ public:
 	void dispay();
 	friend class Strainer;
 };
+
 class Strainer						// выборка совпадений
 {
 protected:
@@ -108,6 +113,7 @@ public:
 	{
 		selection(image, user);
 	}
+	void training(Image& image, Settings& user);
 	void selection(Image& image, Settings& user);
 	void minimize(Settings& user);
 	void display();
