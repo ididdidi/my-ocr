@@ -99,7 +99,7 @@ public:
 	void dispay();
 	friend class Strainer;
 };
-class Strainer //: public Sample		// выборка совпадений
+class Strainer						// выборка совпадений
 {
 protected:
 	list<Compliance> compliance;

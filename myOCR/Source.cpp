@@ -235,12 +235,8 @@ void Strainer::selection(Image& image, Settings& user)
 {
 									// количество шагов
 	unsigned int width = image.putWidth();
-	unsigned int widthMask = user.widthMask;
-	unsigned int stepOffset = user.stepOffset;
-	unsigned int minInterval = user.minInterval;
-	unsigned int maxInterval = user.maxInterval;
-	unsigned int j = 0;			// индекс циклов обработки
-	int posX = 0;		// текущая позиция по X
+	unsigned int j = 0;			// правая граница исследуемого сегмента
+	int posX = 0;				// текущая позиция по X
 	float MinCD;				// минимальное декартово расстояние
 	char  nearestMatch = 0;		// ближайший эталон
 	cout << "selection..." << endl;
@@ -249,17 +245,17 @@ void Strainer::selection(Image& image, Settings& user)
 	omp_init_lock(&lock);
 	int dinamic_threads = omp_get_dynamic();
 	omp_set_dynamic(1);
-#pragma omp parallel shared(stepOffset)
+#pragma omp parallel // shared(stepOffset)
 	{
 #pragma omp for schedule (guided) private(MinCD) firstprivate(nearestMatch,j) lastprivate(posX)
-	for (posX = stepOffset; posX < width - widthMask; posX += stepOffset)
+	for (posX = user.stepOffset; posX < width - user.widthMask; posX += user.stepOffset)
 	{
-		if (image.extremum(posX,stepOffset,widthMask))
+		if (image.extremum(posX, user.stepOffset, user.widthMask))
 		{
-			j = posX + minInterval;	// ищем правую границу искомого объекта(через экстремуму);
-			while ((j + 1 - posX < maxInterval) && (j + 1 < width))
+			j = posX + user.maxInterval;	// ищем правую границу искомого объекта(через экстремуму);
+			while ((j - posX > user.minInterval) && (j < width))
 			{
-				if (image.extremum(j, 1, widthMask))
+				if (image.extremum(j, 1, user.widthMask))
 				{
 					Sample temp;
 					temp.filtering(image, posX, j);
@@ -269,7 +265,7 @@ void Strainer::selection(Image& image, Settings& user)
 						char ch;
 						cin >> ch;
 						if (ch == 'y')
-							diskOut();
+							temp.diskOut();
 						cout << " сместится вправо по X0(если нет - 0): ";
 						int offset = 0;
 						cin >> offset;
@@ -286,7 +282,7 @@ void Strainer::selection(Image& image, Settings& user)
 						omp_unset_lock(&lock);
 					}
 				}
-				j++;
+				j--;
 			}
 		}
 	}
