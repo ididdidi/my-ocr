@@ -19,7 +19,6 @@
 using namespace std;
 
 #include "targetver.h"
-#include "download.h"		// заголовочный файл для метода загрузки изображения
 #include "main.h"
 
 

@@ -6,8 +6,6 @@
 
 int main()
 {
-	setlocale(LC_ALL, "Russian");
-	enum mode { detection, training };			// detection - распознавание, training 
 	Settings user(4,1,10,25,10,"01.bmp");
 	Image img(user);
 	if (detection){

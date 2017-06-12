@@ -1,57 +1,125 @@
 #pragma once
 #ifndef MAINHEAD
 #define MAINHEAD
-#define QF 16						// Количество фильров
-class Settings						// параметры вводимые пользователем
+#define QF 16							// Количество фильров
+
+enum mode { detection, training };		// режимы работы программы 
+										// detection - распознавание, training - тренировка
+
+	// CIEXYZTRIPLE stuff
+typedef int FXPT2DOT30;
+
+typedef struct {
+	FXPT2DOT30 ciexyzX;
+	FXPT2DOT30 ciexyzY;
+	FXPT2DOT30 ciexyzZ;
+} CIEXYZ;
+
+typedef struct {
+	CIEXYZ  ciexyzRed;
+	CIEXYZ  ciexyzGreen;
+	CIEXYZ  ciexyzBlue;
+} CIEXYZTRIPLE;
+
+// bitmap file header
+typedef struct {
+	unsigned short bfType;
+	unsigned int   bfSize;
+	unsigned short bfReserved1;
+	unsigned short bfReserved2;
+	unsigned int   bfOffBits;
+} BITMAPFILEHEADER;
+
+// bitmap info header
+typedef struct {
+	unsigned int   biSize;
+	unsigned int   biWidth;
+	unsigned int   biHeight;
+	unsigned short biPlanes;
+	unsigned short biBitCount;
+	unsigned int   biCompression;
+	unsigned int   biSizeImage;
+	unsigned int   biXPelsPerMeter;
+	unsigned int   biYPelsPerMeter;
+	unsigned int   biClrUsed;
+	unsigned int   biClrImportant;
+	unsigned int   biRedMask;
+	unsigned int   biGreenMask;
+	unsigned int   biBlueMask;
+	unsigned int   biAlphaMask;
+	unsigned int   biCSType;
+	CIEXYZTRIPLE   biEndpoints;
+	unsigned int   biGammaRed;
+	unsigned int   biGammaGreen;
+	unsigned int   biGammaBlue;
+	unsigned int   biIntent;
+	unsigned int   biProfileData;
+	unsigned int   biProfileSize;
+	unsigned int   biReserved;
+} BITMAPINFOHEADER;
+
+// read bytes
+template <typename Type>
+void read(std::ifstream &fp, Type &result, std::size_t size) {
+	fp.read(reinterpret_cast<char*>(&result), size);
+}
+
+	// параметры вводимые пользователем
+class Settings						
 {
 private:
 	unsigned int widthMask;			// ширина накладываемой маски при поиске экстреммум f1
 	unsigned int stepOffset;		// шаг смещения при поиске экстреммум f1
 	unsigned int minInterval;		// минимальная ширина символа в пикселях
 	unsigned int maxInterval;		// максимальная ширина символа в пикселях
-	float percentOverlay;			// процент наложения
+	float percentOverlay;			// допустимый процент наложения гипотез
 	char fileName[40];				// имя файла изображением
 public:
 	Settings(int wM, int sO, int minIn, int maxIn, float pO, char* fname)
-	{
-		widthMask = wM;			// ширина накладываемой маски при поиске экстреммум f1
-		stepOffset = sO;		// шаг смещения при поиске экстреммум f1
-		minInterval = minIn;	// минимальная ширина символа в пикселях
-		maxInterval = maxIn;	// максимальная ширина символа в пикселях
-		percentOverlay = pO;
-		strcpy_s(fileName,fname);
-	}
-	void getMode();
+	: widthMask (wM), stepOffset(sO), minInterval (minIn), maxInterval (maxIn), 
+		percentOverlay (pO)
+	{ strcpy_s(fileName,fname); }
 	friend class Image;
 	friend class Sample;
 	friend class Strainer;
 };
 
-class Pixel						// хранит яркость пикселя
+	// яркость пикселя
+class Pixel						
 {
 private:
 	unsigned char brightness;			
 public:
 	Pixel() : brightness(0)
 	{}
-	void get(const double& br);			// получить значение яркости
+	void get(const double& br);				// получить значение яркости
 	unsigned char& put();					// передать значение яркости
 };
 
-class Image						// хранит изображение в виде массива Pixel;
+	// изображение в виде массива Pixel;
+class Image
 {
 private:
-	Image(const Image&)	{}					// Конструктор копирования;
+	Image(const Image&) {}						// Конструктор копирования;
 protected:
 	Pixel* pixel;								// указатель на массив;
 	unsigned int height;						// высота изображение;
 	unsigned int width;							// ширина изображения;
+	unsigned char bitextract(const unsigned int byte, const unsigned int mask);
 public:
-	Image(Settings& user); // >> >> >> download.cpp						// конструктор
+	Image(Settings& user); 						// конструктор
 	~Image()
 	{
 		delete[]pixel;
 	}
+	class ImageEx								// класс иключений
+	{
+	public:
+		string origin;							// для имени функции
+		string value;							// для хранения ошибочного значения;
+		ImageEx(string or , string vl) : origin(or ), value(vl)
+		{ }
+	};
 	unsigned int putHeight()const;
 	unsigned int putWidth()const;
 	unsigned char& operator [](const unsigned int& numberPix)const;
@@ -59,7 +127,8 @@ public:
 	bool extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask);
 };
 
-class Sample								// находит хранит, и записывает эталоны;
+	// находит, хранит, и записывает эталоны;
+class Sample								
 {
 protected:
 	char match;								// номер эталона
@@ -67,17 +136,18 @@ protected:
 public:
 	Sample()
 	{
-		for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
+		for (int i = 0; i < QF; i++)Filtered[i] = 0.0; // обнуляем массив рпи создании
 	}
-	char returnMatch();
-	void filtering(const Image& image, const unsigned int& x0, const unsigned int& xEnd);
-	void diskOut();
-	char compareWithBase(float& MinCD);
+	char returnMatch();						// вернуть номер эталона(символа)
+	void filtering(const Image& image, const unsigned int& x0, 
+					const unsigned int& xEnd);		// наложение фильтров;
+	void diskOut();									// запичсь значенйв файл
+	char compareWithBase(float& MinCD);				// сравниваем с эталонами
 	float operator - (const Sample& matchFiltred);
-	void training(Image& image, Settings& user);
-
+	void training(Image& image, Settings& user);	// добававление эталонов
 };
 
+	// данные о соответствии гипотез эталонам
 class Compliance
 {
 protected:
@@ -95,21 +165,22 @@ public:
 	{
 		return x0 < rhs.x0;
 	}
-	void dispay();
+	void dispay();					// вывод на экран
 	friend class Strainer;
 };
 
-class Strainer						// выборка совпадений
+	// выборка совпадений
+class Strainer						
 {
 protected:
 	list<Compliance> compliance;
 public:
 	Strainer(Image& image, Settings& user)
 	{
-		selection(image, user);
+		selection(image, user);			// ищем совпадения с эталонами
 	}
-	void selection(Image& image, Settings& user);
-	void minimize(Settings& user);
-	void display();
+	void selection(Image& image, Settings& user);	// поиск совпадений
+	void minimize(Settings& user);		// удаление лишних совпадений
+	void display();						// вывод результата  поиска совпадений
 };
 #endif // !MAINHEAD
