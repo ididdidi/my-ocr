@@ -20,8 +20,7 @@ Image::Image(Settings& user)			// получает значени€ €ркости из файла
 	// открываем файл
 	std::ifstream fileStream(fileName, std::ifstream::binary);
 	if (!fileStream) {
-		std::cout << "Error opening file '" << fileName << "'." << std::endl;
-		return;
+		throw ImageEx("Download image", user.fileName);
 	}
 
 	// заголовк изображени€
