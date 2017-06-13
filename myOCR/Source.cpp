@@ -1,18 +1,22 @@
 #include "stdafx.h"
 
-//	методы класса Pixel
+						/* методы класса Pixel */
+
+// получить значение яркости пикселя
 void Pixel::get(const double& br)			// получить значение яркости
 {
 	brightness = static_cast<char>(br);
 }
 
-unsigned char& Pixel::put()					// передать значение яркости
+// передать значение яркости пикселя
+unsigned char& Pixel::put()					
 {
 	return brightness;
 }
   
-//	методы класса Image
+						/* методы класса Image */
 
+// конструктор = загрузчик информации с изображения
 Image::Image(Settings& user)			// получает значения яркости из файла
 {
 	char *fileName = user.fileName;
@@ -20,7 +24,7 @@ Image::Image(Settings& user)			// получает значения яркости из файла
 	// открываем файл
 	std::ifstream fileStream(fileName, std::ifstream::binary);
 	if (!fileStream) {
-		throw ImageEx("Download image", user.fileName);
+		throw ImageEx("download image", user.fileName, " is not available!");
 	}
 
 	// заголовк изображения
@@ -32,8 +36,7 @@ Image::Image(Settings& user)			// получает значения яркости из файла
 	read(fileStream, fileHeader.bfOffBits, sizeof(fileHeader.bfOffBits));
 
 	if (fileHeader.bfType != 0x4D42) {
-		std::cout << "Error: '" << fileName << "' is not BMP file." << std::endl;
-		return;
+		throw ImageEx("download image", user.fileName, " is not BMP file."); 
 	}
 
 	// информация изображения
@@ -113,18 +116,15 @@ Image::Image(Settings& user)			// получает значения яркости из файла
 	// проверка на поддерку этой версии формата
 	if (fileInfoHeader.biSize != 12 && fileInfoHeader.biSize != 40 && fileInfoHeader.biSize != 52 &&
 		fileInfoHeader.biSize != 56 && fileInfoHeader.biSize != 108 && fileInfoHeader.biSize != 124) {
-		std::cout << "Error: Unsupported BMP format." << std::endl;
-		return;
+		throw ImageEx("download image", user.fileName, " unsupported BMP format.");
 	}
 
 	if (fileInfoHeader.biBitCount != 16 && fileInfoHeader.biBitCount != 24 && fileInfoHeader.biBitCount != 32) {
-		std::cout << "Error: Unsupported BMP bit count." << std::endl;
-		return;
+		throw ImageEx("download image", user.fileName, " unsupported BMP bit count.");
 	}
 
 	if (fileInfoHeader.biCompression != 0 && fileInfoHeader.biCompression != 3) {
-		std::cout << "Error: Unsupported BMP compression." << std::endl;
-		return;
+		throw ImageEx("download image", user.fileName, " unsupported BMP compression.");
 	}
 
 	// сохранение данных в классе Image
@@ -136,16 +136,20 @@ Image::Image(Settings& user)			// получает значения яркости из файла
 	// определение размера отступа в конце каждой строки
 	int linePadding = ((fileInfoHeader.biWidth * (fileInfoHeader.biBitCount / 8)) % 4) & 3;
 
-	if (!(height*width)) exit(2);
+
+	if (!(height*width)) {
+		throw ImageEx("download image", user.fileName, " less than one pixel.");
+	}	
+		// создаём динамический массив для хранения значений ярокости	
 	if (pixel)
 	{
 		delete[]pixel;
 	}
 	pixel = new Pixel[height*width];
-	//unsigned int k = 0;
 	int i = 0;
 	unsigned int j = 0;
 
+	// вычисляем значения яркости пикселей и сохраняем их в динамический массив
 #pragma omp parallel num_threads(omp_get_max_threads()/2)
 	{
 #pragma omp for schedule (guided) firstprivate(j) lastprivate(i) ordered
@@ -180,16 +184,19 @@ unsigned char Image::bitextract(const unsigned int byte, const unsigned int mask
 	return (byte & mask) >> maskPadding;
 }
 
+// возвращает значение высоты в пикселях
 unsigned int Image::putHeight()const
 {
 	return height;
 }
 
+// возвращает значение ширины в пикселях
 unsigned int Image::putWidth()const
 {
 	return width;
 }
 
+// возвращает значение полученное от наложения фильтра F1
 float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 {
 	float temp = 0.0;
@@ -205,13 +212,17 @@ float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 	return temp;
 }
 
+// возвращает значение яркости пикселя хранимое в массиве
 unsigned char& Image::operator[](const unsigned int& numberPix)const
 {
-	if (numberPix > height*width) exit(1);
+	if (numberPix > height*width){
+		throw ImageEx("operator[]", " method", " left was out of bounds of the array");
+	}
 
 	return pixel[numberPix].put();
 }
 
+// находит экстремумы графика полученного наложением фильтра F1 на изображение
 bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask)
 {
 	return (((valueF(posX - stepOffset, widthMask) < valueF(posX, widthMask))
@@ -220,21 +231,26 @@ bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned in
 			&& (valueF(posX, widthMask) < valueF(posX + stepOffset, widthMask))));
 }
 
-//	методы класса Settings
+					/* методы класса Settings */
 
 
-//	методы класса Compliance
+					/*	методы класса Compliance */
+
+// выаоди на экран данные о соответствии гипотез эталонам
 void Compliance::dispay()
 {
 	cout << endl << x0 << ' ' << xEnd << ' ' << nearestMatch << ' ' << CartesianDistance;
 }
 
-//	методы класса Sample
+						/*методы класса Sample */
+
+// возвращает эталон
 char Sample::returnMatch()
 {
 	return match;
 }
 
+// накладывает все 16 фильтров ТАВ
 void Sample::filtering(const Image& image, const unsigned int& x0, const unsigned int& xEnd)
 {
 	unsigned int numberPix = x0;				// начальная координата наложения фильтра
@@ -351,7 +367,8 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 	}
 }
 
-void Sample::diskOut()						// Запись в конец файла.
+// Запись новых эталонов в конец файла - баыз данных
+void Sample::diskOut()						
 {
 		cout << "\tRecord a sample in the database";
 	cout << "\t\tEnter the symbol... ";  cin >> match;
@@ -359,11 +376,16 @@ void Sample::diskOut()						// Запись в конец файла.
 	ofstream outfile;						// созадан поток вывода
 	outfile.open("MatchBase.dat", ios::app | ios::out | ios::binary); // открыть для записи
 	outfile.write((char*)this, sizeof(*this));	// Объект записан;
+	if (!outfile) {
+		throw SampleEx("the entry of new matchs", "MatchBase.dat", "  is not writable!");
+	}
 	outfile.close();	
 }
 
+// из результата наложения фильтра детектируемого изображения
+	//вычитает результат наложения фильтра на эталон
 float Sample::operator - (const Sample& match)
-{
+{		// Евклидова метрика в виде цикла
 	long double tempDC = 0.0;
 	for (int i = 0; i < QF; i++)
 	{
@@ -373,22 +395,27 @@ float Sample::operator - (const Sample& match)
 	return (float)(sqrt(tempDC));
 }
 
-char Sample::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращает ближайший
+//сравнивает с эталонами, возвращает ближайший
+char Sample::compareWithBase(float& MinCD) 
 {											 // и расстояние до него(&MinCD);
 	char  nearestMatch = 0;
-	float tempCD;				// текущее значение декартовова расстояния
+	float tempCD;				// текущее значение Евклидова расстояния
 	Sample tempSample;			// буфер для временного хранения эталонов
 	fstream infile;				// открыть поток ввода из файла;
+	
 	infile.open("MatchBase.dat", ios::in | ios::binary);
-	if (!infile) exit(3);
+	if (!infile) {
+		exit(1);
+	}
+	
 	// считываем значения эталонв из обучающей выборки:
 	infile.read(reinterpret_cast<char*>(&tempSample), sizeof(tempSample));
 	while (!infile.eof())
 	{
-		tempCD = *this - tempSample;	// находим декартово расстояние
+		tempCD = *this - tempSample;	// находим Евклидово расстояние
 
 		if (!nearestMatch || MinCD > tempCD)// если это первое сравнение или  
-		{									// предыдущее декартово рсстояние больше
+		{									// предыдущее Евклидово рсстояние больше
 			MinCD = tempCD;					// сохраняем это как минимальное 
 											// запоминаем эталон как наиболее близкий
 			nearestMatch = tempSample.returnMatch();
@@ -399,20 +426,20 @@ char Sample::compareWithBase(float& MinCD) //сравнивает с эталонами, возвращает 
 	return nearestMatch;		// вернём ближайший эталон
 }
 
+// метод обучения с учителем
 void Sample::training(Image& image, Settings& user)
 {
-	// количество шагов
-	unsigned int width = image.putWidth();
+	unsigned int width = image.putWidth(); // ширина изображения
 	unsigned int rightEdge = 0;			// правая граница исследуемого сегмента
 	unsigned int leftEdge = 0;				// текущая позиция по X
 
 	char resume;
-	do {
-		do {
+	do {					// цикл для необходимого числа повторений
+		do {				// просим ввести левую границу эталона
 			cout << "\nEnter the left character border...";
 			cin >> leftEdge;
 		} while (leftEdge > (width - user.widthMask) || leftEdge < 0);
-		do {
+		do {				// просим ввести правую границу эталона
 			cout << "Enter the right character border...";
 			cin >> rightEdge;
 		} while ((rightEdge - leftEdge) < user.minInterval || rightEdge > width || (rightEdge - leftEdge) > user.maxInterval);
@@ -428,10 +455,10 @@ void Sample::training(Image& image, Settings& user)
 				{
 					if (image.extremum(rightEdge, 1, user.widthMask))
 					{
-
 						cout << "The actual border: l = " << leftEdge << " r = " << rightEdge;
 						cout << "To preserve the value found(y/n)? ";
 						cin >> ch;
+						// сохраняем если устраивает
 						if (ch == 'y' || ch == 'Y')
 						{
 							for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
@@ -444,21 +471,23 @@ void Sample::training(Image& image, Settings& user)
 				}
 			}
 			if (ch == 'y' || ch == 'Y')
-				break;
+				break;		// выходим из цикла если сохранили эталон
 		}
 		cout << "Continue entering(y/n)? ";
 		resume = _getch();
 	} while (resume == 'y' || resume == 'Y');
 }
 
-//	методы класса Strainer
+						/* методы класса Strainer */
+
+// поиск соответствий эталонам
 void Strainer::selection(Image& image, Settings& user)
 {
-									// количество шагов
-	unsigned int width = image.putWidth();
+
+	unsigned int width = image.putWidth();	// ширина изображения
 	unsigned int j = 0;			// правая граница исследуемого сегмента
 	int posX = 0;				// текущая позиция по X
-	float MinCD;				// минимальное декартово расстояние
+	float MinCD;				// минимальное Евклидово расстояние
 	char  nearestMatch = 0;		// ближайший эталон
 	cout << "selection..." << endl;
 						// внешний цикл обработки. обход по ширине изображения с заданным шагом 
@@ -466,47 +495,55 @@ void Strainer::selection(Image& image, Settings& user)
 	omp_init_lock(&lock);
 	int dinamic_threads = omp_get_dynamic();
 	omp_set_dynamic(1);
-#pragma omp parallel // shared(stepOffset)
+#pragma omp parallel 
 	{
 #pragma omp for schedule (guided) private(MinCD) firstprivate(nearestMatch,j) lastprivate(posX)
-	for (posX = user.stepOffset; posX < width - user.widthMask; posX += user.stepOffset)
-	{
-		if (image.extremum(posX, user.stepOffset, user.widthMask))
-		{
-			j = posX + user.maxInterval;	// ищем правую границу искомого объекта(через экстремуму);
-			while ((j - posX > user.minInterval) && (j < width))
+		// цикл в котором смещается правая граница наложения фильтров
+		for (posX = user.stepOffset; posX < width - user.widthMask; posX += user.stepOffset)
+		{	
+			if (image.extremum(posX, user.stepOffset, user.widthMask))
 			{
-				if (image.extremum(j, 1, user.widthMask))
-				{
-					Sample temp;
-					temp.filtering(image, posX, j);
-					nearestMatch = temp.compareWithBase(MinCD);
-					omp_set_lock(&lock);
-					compliance.push_back(Compliance(posX, j, nearestMatch, MinCD));
-					omp_unset_lock(&lock);
+				j = posX + user.maxInterval;	// ищем правую границу искомого объекта(через экстремуму);
+				// цикл в котором смещаестя левая граница наложения фильтров
+				while ((j - posX > user.minInterval) && (j < width))
+				{	
+					if (image.extremum(j, 1, user.widthMask))
+					{
+						Sample temp;	// хранит результат наложения фильтров на фрагмет изображения
+						temp.filtering(image, posX, j);	// наложение фильтров
+						nearestMatch = temp.compareWithBase(MinCD);	// находим расстояние до ближайшего эталона 
+						omp_set_lock(&lock);						// замок для корректного добавления значений в список
+								// добавим найденое значение в список
+						compliance.push_back(Compliance(posX, j, nearestMatch, MinCD));
+						omp_unset_lock(&lock);						// снимем замок
+					}
+					j--;		// правая граница смещается справа на лево
 				}
-				j--;
 			}
 		}
-	}
     }
 	omp_set_dynamic(dinamic_threads);
 	omp_destroy_lock(&lock);
 }
 
+// убирает лишние значения
 void Strainer::minimize(Settings& user)
 {
-	compliance.sort();
-	list<Compliance>::iterator  iterLeft, iterRight;
-	iterLeft = compliance.begin();
+	compliance.sort();			// сортируем по занчению x0(координата начала);
+	list<Compliance>::iterator  iterLeft, iterRight;	//сохздаём итераторы
+	iterLeft = compliance.begin();				// инициализируем итераторы
 	iterRight = compliance.begin();
-	iterRight++;
+	iterRight++;								// смещеаме правый итератор 
 
-	for (; iterRight != compliance.end();)
+	for (; iterRight != compliance.end();)		// пока правый итератор указывает на элемент списка
 	{
-		float layering = (iterLeft->xEnd - iterRight->x0);
-		float minW = (((iterLeft->xEnd - iterLeft->x0) < (iterRight->xEnd - iterRight->x0)) ? (iterLeft->xEnd - iterLeft->x0) : (iterRight->xEnd - iterRight->x0));
-		if(layering / minW > (user.percentOverlay / 100))
+		float layering = (iterLeft->xEnd - iterRight->x0); // найдём ширину наложения в пикселях
+					// найдём ширину того из символов, который меньше:
+		float minW = (((iterLeft->xEnd - iterLeft->x0) < (iterRight->xEnd - iterRight->x0)) ?
+						(iterLeft->xEnd - iterLeft->x0) : (iterRight->xEnd - iterRight->x0));
+				// сравниваем соотношение ширины наложения и ширины символа с допустимым процентом наложения
+		if(layering / minW > (user.percentOverlay / 100)) 
+				// сохраняем сивол с наименьшим Евклидовым расстоянием до одного из эталонов
 			if (iterLeft->CartesianDistance > iterRight->CartesianDistance)
 			{
 				iterLeft = compliance.erase(iterLeft);
@@ -524,6 +561,7 @@ void Strainer::minimize(Settings& user)
 	}
 }
 
+// вывод списка с найдеными символами на экран
 void Strainer::display()
 {
 	list<Compliance>::iterator iter;

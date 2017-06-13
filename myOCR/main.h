@@ -117,7 +117,9 @@ public:
 	public:
 		string origin;							// для имени функции
 		string value;							// для хранения ошибочного значения;
-		ImageEx(string or , string vl) : origin(or ), value(vl)
+		string description;						// описание
+		ImageEx(string or , string vl, string desc) 
+			: origin(or ), value(vl), description(desc)
 		{ }
 	};
 	unsigned int putHeight()const;
@@ -138,6 +140,16 @@ public:
 	{
 		for (int i = 0; i < QF; i++)Filtered[i] = 0.0; // обнуляем массив рпи создании
 	}
+	class SampleEx								// класс иключений
+	{
+	public:
+		string origin;							// для имени функции
+		string value;							// для хранения ошибочного значения;
+		string description;						// описание
+		SampleEx(string or , string vl, string desc)
+			: origin(or ), value(vl), description(desc)
+		{ }
+	};
 	char returnMatch();						// вернуть номер эталона(символа)
 	void filtering(const Image& image, const unsigned int& x0, 
 					const unsigned int& xEnd);		// наложение фильтров;
@@ -161,7 +173,7 @@ public:
 	Compliance(int X0, int End, int nM, float CD) :
 		x0(X0), xEnd(End), nearestMatch(nM), CartesianDistance(CD)
 	{ }
-	bool operator < (const Compliance& rhs)
+	bool operator < (const Compliance& rhs)	// для сортировки
 	{
 		return x0 < rhs.x0;
 	}
