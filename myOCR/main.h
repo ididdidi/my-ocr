@@ -64,25 +64,11 @@ void read(std::ifstream &fp, Type &result, std::size_t size) {
 	fp.read(reinterpret_cast<char*>(&result), size);
 }
 
-	// параметры вводимые пользователем
-class Settings						
-{
-private:
-	unsigned int widthMask;			// ширина накладываемой маски при поиске экстреммум f1
-	unsigned int stepOffset;		// шаг смещени€ при поиске экстреммум f1
-	unsigned int minInterval;		// минимальна€ ширина символа в пиксел€х
-	unsigned int maxInterval;		// максимальна€ ширина символа в пиксел€х
-	float percentOverlay;			// допустимый процент наложени€ гипотез
-	char fileName[40];				// им€ файла изображением
-public:
-	Settings(int wM, int sO, int minIn, int maxIn, float pO, char* fname)
-	: widthMask (wM), stepOffset(sO), minInterval (minIn), maxInterval (maxIn), 
-		percentOverlay (pO)
-	{ strcpy_s(fileName,fname); }
-	friend class Image;
-	friend class Sample;
-	friend class Strainer;
-};
+// выбор режима
+mode getMode();
+
+// выбор изображени€
+string getFileName();
 
 	// €ркость пиксел€
 class Pixel						
@@ -107,7 +93,7 @@ protected:
 	unsigned int width;							// ширина изображени€;
 	unsigned char bitextract(const unsigned int byte, const unsigned int mask);
 public:
-	Image(Settings& user); 						// конструктор
+	Image(string fileName); 						// конструктор
 	~Image()
 	{
 		delete[]pixel;
@@ -129,6 +115,25 @@ public:
 	bool extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask);
 };
 
+// параметры вводимые пользователем
+class Settings
+{
+private:
+	unsigned int widthMask;			// ширина накладываемой маски при поиске экстреммум f1
+	unsigned int stepOffset;		// шаг смещени€ при поиске экстреммум f1
+	unsigned int minInterval;		// минимальна€ ширина символа в пиксел€х
+	unsigned int maxInterval;		// максимальна€ ширина символа в пиксел€х
+	float percentOverlay;			// допустимый процент наложени€ гипотез
+public:
+	Settings(unsigned int width);
+	Settings(int wM, int sO, int minIn, int maxIn, float pO)
+		: widthMask(wM), stepOffset(sO), minInterval(minIn), maxInterval(maxIn),
+		percentOverlay(pO)
+	{ }
+	friend class Image;
+	friend class Sample;
+	friend class Strainer;
+};
 	// находит, хранит, и записывает эталоны;
 class Sample								
 {

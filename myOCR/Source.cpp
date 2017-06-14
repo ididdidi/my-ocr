@@ -1,5 +1,34 @@
 #include "stdafx.h"
 
+// выбор режима
+mode getMode()
+{
+	char ch=0;
+	while (true)
+	{
+		cout << " Select mode: the detection(d) or training(t)...";
+		ch = _getch();
+		if (ch == 'd' || ch == 'D'){
+			cout << "detection...";
+			return detection;
+		}
+		else if (ch == 't' || ch == 'T'){
+				cout << "training...";
+				return training;
+			 }
+		cout << ch << " - not satisfies the condition" << endl;
+	}
+}
+
+// выбор изображени€
+string getFileName()
+{
+	string temp;
+	cout << "\n Please enter the name of the image... ";
+	cin >> temp;
+	return temp;
+}
+
 						/* методы класса Pixel */
 
 // получить значение €ркости пиксел€
@@ -17,14 +46,13 @@ unsigned char& Pixel::put()
 						/* методы класса Image */
 
 // конструктор = загрузчик информации с изображени€
-Image::Image(Settings& user)			// получает значени€ €ркости из файла
+Image::Image(string fileName)			// получает значени€ €ркости из файла
 {
-	char *fileName = user.fileName;
-
+	
 	// открываем файл
 	std::ifstream fileStream(fileName, std::ifstream::binary);
 	if (!fileStream) {
-		throw ImageEx("download image", user.fileName, " is not available!");
+		throw ImageEx("download image", fileName, " is not available!");
 	}
 
 	// заголовк изображени€
@@ -36,7 +64,7 @@ Image::Image(Settings& user)			// получает значени€ €ркости из файла
 	read(fileStream, fileHeader.bfOffBits, sizeof(fileHeader.bfOffBits));
 
 	if (fileHeader.bfType != 0x4D42) {
-		throw ImageEx("download image", user.fileName, " is not BMP file."); 
+		throw ImageEx("download image", fileName, " is not BMP file."); 
 	}
 
 	// информаци€ изображени€
@@ -116,15 +144,15 @@ Image::Image(Settings& user)			// получает значени€ €ркости из файла
 	// проверка на поддерку этой версии формата
 	if (fileInfoHeader.biSize != 12 && fileInfoHeader.biSize != 40 && fileInfoHeader.biSize != 52 &&
 		fileInfoHeader.biSize != 56 && fileInfoHeader.biSize != 108 && fileInfoHeader.biSize != 124) {
-		throw ImageEx("download image", user.fileName, " unsupported BMP format.");
+		throw ImageEx("download image", fileName, " unsupported BMP format.");
 	}
 
 	if (fileInfoHeader.biBitCount != 16 && fileInfoHeader.biBitCount != 24 && fileInfoHeader.biBitCount != 32) {
-		throw ImageEx("download image", user.fileName, " unsupported BMP bit count.");
+		throw ImageEx("download image", fileName, " unsupported BMP bit count.");
 	}
 
 	if (fileInfoHeader.biCompression != 0 && fileInfoHeader.biCompression != 3) {
-		throw ImageEx("download image", user.fileName, " unsupported BMP compression.");
+		throw ImageEx("download image", fileName, " unsupported BMP compression.");
 	}
 
 	// сохранение данных в классе Image
@@ -138,7 +166,7 @@ Image::Image(Settings& user)			// получает значени€ €ркости из файла
 
 
 	if (!(height*width)) {
-		throw ImageEx("download image", user.fileName, " less than one pixel.");
+		throw ImageEx("download image", fileName, " less than one pixel.");
 	}	
 		// создаЄм динамический массив дл€ хранени€ значений €рокости	
 	if (pixel)
@@ -233,10 +261,43 @@ bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned in
 
 					/* методы класса Settings */
 
+// запрашивает у пользовател€ информацию о настройках
+Settings::Settings(unsigned int width)
+{
+	// ширина накладываемой маски при поиске экстреммум f1
+	do {
+		cout << " Enter the width of the filter... ";
+		cin >> widthMask;
+	} while (widthMask<1 || widthMask > width || widthMask%4);
+
+	// шаг смещени€ при поиске экстреммум f1
+	do {
+		cout << " Enter step offset filter... ";
+		cin >> stepOffset;
+	} while (stepOffset<1 || stepOffset > width);
+
+	// минимальна€ ширина символа в пиксел€х
+	do {
+		cout << " Enter the minimum width of a character... ";
+		cin >> minInterval;
+	} while (minInterval<1 || minInterval > width);
+
+	// максимальна€ ширина символа в пиксел€х
+	do {
+		cout << " Enter the maximum width of a character... ";
+		cin >> maxInterval;
+	} while (maxInterval<minInterval+1 || maxInterval > width);
+
+	// допустимый процент наложени€ гипотез
+	do {
+		cout << " Enter the percentage of overlapping characters... ";
+		cin >> percentOverlay;
+	} while (percentOverlay<0 || percentOverlay > 100);
+}
 
 					/*	методы класса Compliance */
 
-// выаоди на экран данные о соответствии гипотез эталонам
+// выводит на экран данные о соответствии гипотез эталонам
 void Compliance::dispay()
 {
 	cout << endl << x0 << ' ' << xEnd << ' ' << nearestMatch << ' ' << CartesianDistance;
@@ -489,7 +550,7 @@ void Strainer::selection(Image& image, Settings& user)
 	int posX = 0;				// текуща€ позици€ по X
 	float MinCD;				// минимальное ≈вклидово рассто€ние
 	char  nearestMatch = 0;		// ближайший эталон
-	cout << "selection..." << endl;
+	cout << "\nselection..." << endl;
 						// внешний цикл обработки. обход по ширине изображени€ с заданным шагом 
 	omp_lock_t lock;
 	omp_init_lock(&lock);
@@ -564,6 +625,7 @@ void Strainer::minimize(Settings& user)
 // вывод списка с найдеными символами на экран
 void Strainer::display()
 {
+	cout << "\nresult:" << endl;
 	list<Compliance>::iterator iter;
 	for (iter = compliance.begin(); iter != compliance.end(); ++iter)
 		iter->dispay();
