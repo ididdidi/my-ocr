@@ -10,7 +10,7 @@ int main()
 		try {
 			Image img(getFileName());
 			Settings user(img.putWidth());
-			if (detection) {
+			if (operationMode) {
 				Sample smpl;
 				smpl.training(img, user);
 			}

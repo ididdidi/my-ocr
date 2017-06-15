@@ -9,14 +9,14 @@ mode getMode()
 		cout << " Select mode: the detection(d) or training(t)...";
 		ch = _getch();
 		if (ch == 'd' || ch == 'D'){
-			cout << "detection...";
+			cout << " detection...";
 			return detection;
 		}
 		else if (ch == 't' || ch == 'T'){
-				cout << "training...";
+				cout << " training...";
 				return training;
 			 }
-		cout << ch << " - not satisfies the condition" << endl;
+		cout << ch << " - not the right request" << endl;
 	}
 }
 
@@ -266,13 +266,13 @@ Settings::Settings(unsigned int width)
 {
 	// ширина накладываемой маски при поиске экстреммум f1
 	do {
-		cout << " Enter the width of the filter... ";
+		cout << " Enter the width of the mask is a multiple of four... ";
 		cin >> widthMask;
 	} while (widthMask<1 || widthMask > width || widthMask%4);
 
 	// шаг смещения при поиске экстреммум f1
 	do {
-		cout << " Enter step offset filter... ";
+		cout << " Enter the step offset of the mask... ";
 		cin >> stepOffset;
 	} while (stepOffset<1 || stepOffset > width);
 
@@ -547,7 +547,7 @@ void Strainer::selection(Image& image, Settings& user)
 
 	unsigned int width = image.putWidth();	// ширина изображения
 	unsigned int j = 0;			// правая граница исследуемого сегмента
-	int posX = 0;				// текущая позиция по X
+	int leftEdge = 0;				// 
 	float MinCD;				// минимальное Евклидово расстояние
 	char  nearestMatch = 0;		// ближайший эталон
 	cout << "\nselection..." << endl;
@@ -558,24 +558,24 @@ void Strainer::selection(Image& image, Settings& user)
 	omp_set_dynamic(1);
 #pragma omp parallel 
 	{
-#pragma omp for schedule (guided) private(MinCD) firstprivate(nearestMatch,j) lastprivate(posX)
+#pragma omp for schedule (guided) private(MinCD) firstprivate(nearestMatch,j) lastprivate(leftEdge)
 		// цикл в котором смещается правая граница наложения фильтров
-		for (posX = user.stepOffset; posX < width - user.widthMask; posX += user.stepOffset)
+		for (leftEdge = user.stepOffset; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
 		{	
-			if (image.extremum(posX, user.stepOffset, user.widthMask))
+			if (image.extremum(leftEdge, user.stepOffset, user.widthMask))
 			{
-				j = posX + user.maxInterval;	// ищем правую границу искомого объекта(через экстремуму);
+				j = leftEdge + user.maxInterval;	// ищем правую границу искомого объекта(через экстремуму);
 				// цикл в котором смещаестя левая граница наложения фильтров
-				while ((j - posX > user.minInterval) && (j < width))
+				while ((j - leftEdge > user.minInterval) && (j < width))
 				{	
 					if (image.extremum(j, 1, user.widthMask))
 					{
 						Sample temp;	// хранит результат наложения фильтров на фрагмет изображения
-						temp.filtering(image, posX, j);	// наложение фильтров
+						temp.filtering(image, leftEdge, j);	// наложение фильтров
 						nearestMatch = temp.compareWithBase(MinCD);	// находим расстояние до ближайшего эталона 
 						omp_set_lock(&lock);						// замок для корректного добавления значений в список
 								// добавим найденое значение в список
-						compliance.push_back(Compliance(posX, j, nearestMatch, MinCD));
+						compliance.push_back(Compliance(leftEdge, j, nearestMatch, MinCD));
 						omp_unset_lock(&lock);						// снимем замок
 					}
 					j--;		// правая граница смещается справа на лево
@@ -591,33 +591,33 @@ void Strainer::selection(Image& image, Settings& user)
 void Strainer::minimize(Settings& user)
 {
 	compliance.sort();			// сортируем по занчению x0(координата начала);
-	list<Compliance>::iterator  iterLeft, iterRight;	//сохздаём итераторы
-	iterLeft = compliance.begin();				// инициализируем итераторы
-	iterRight = compliance.begin();
-	iterRight++;								// смещеаме правый итератор 
+	list<Compliance>::iterator  thisIter, newIter;	//сохздаём итераторы
+	thisIter = compliance.begin();				// инициализируем итераторы
+	newIter = compliance.begin();
+	newIter++;								// смещеаме правый итератор 
 
-	for (; iterRight != compliance.end();)		// пока правый итератор указывает на элемент списка
+	for (; newIter != compliance.end();)		// пока правый итератор указывает на элемент списка
 	{
-		float layering = (iterLeft->xEnd - iterRight->x0); // найдём ширину наложения в пикселях
+		float layering = (thisIter->xEnd - newIter->x0); // найдём ширину наложения в пикселях
 					// найдём ширину того из символов, который меньше:
-		float minW = (((iterLeft->xEnd - iterLeft->x0) < (iterRight->xEnd - iterRight->x0)) ?
-						(iterLeft->xEnd - iterLeft->x0) : (iterRight->xEnd - iterRight->x0));
+		float minW = (((thisIter->xEnd - thisIter->x0) < (newIter->xEnd - newIter->x0)) ?
+						(thisIter->xEnd - thisIter->x0) : (newIter->xEnd - newIter->x0));
 				// сравниваем соотношение ширины наложения и ширины символа с допустимым процентом наложения
 		if(layering / minW > (user.percentOverlay / 100)) 
 				// сохраняем сивол с наименьшим Евклидовым расстоянием до одного из эталонов
-			if (iterLeft->CartesianDistance > iterRight->CartesianDistance)
+			if (thisIter->CartesianDistance > newIter->CartesianDistance)
 			{
-				iterLeft = compliance.erase(iterLeft);
-				iterRight++;
+				thisIter = compliance.erase(thisIter);
+				newIter++;
 			}
 			else
 			{
-				iterRight = compliance.erase(iterRight);
+				newIter = compliance.erase(newIter);
 			}
 		else
 		{
-			iterLeft = iterRight;
-			iterRight++;
+			thisIter = newIter;
+			newIter++;
 		}
 	}
 }
