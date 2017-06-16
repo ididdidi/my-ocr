@@ -9,7 +9,7 @@ int main()
 	do {
 		try {
 			Image img(getFileName());
-			Settings user(img.putWidth());
+			Settings user(operationMode, img.putWidth());
 			if (operationMode) {
 				Sample smpl;
 				smpl.training(img, user);

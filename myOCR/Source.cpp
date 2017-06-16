@@ -262,7 +262,7 @@ bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned in
 					/* методы класса Settings */
 
 // запрашивает у пользовател€ информацию о настройках
-Settings::Settings(unsigned int width)
+Settings::Settings(const mode& operationMode, unsigned int width)
 {
 	// ширина накладываемой маски при поиске экстреммум f1
 	do {
@@ -275,24 +275,26 @@ Settings::Settings(unsigned int width)
 		cout << " Enter the step offset of the mask... ";
 		cin >> stepOffset;
 	} while (stepOffset<1 || stepOffset > width);
+	
+	if(!operationMode){	// если распознавание то запарашиваем дополнительные параметры:
+		// минимальна€ ширина символа в пиксел€х
+		do {
+			cout << " Enter the minimum width of a character... ";
+			cin >> minInterval;
+		} while (minInterval<1 || minInterval > width);
 
-	// минимальна€ ширина символа в пиксел€х
-	do {
-		cout << " Enter the minimum width of a character... ";
-		cin >> minInterval;
-	} while (minInterval<1 || minInterval > width);
+		// максимальна€ ширина символа в пиксел€х
+		do {
+			cout << " Enter the maximum width of a character... ";
+			cin >> maxInterval;
+		} while (maxInterval<minInterval+1 || maxInterval > width);
 
-	// максимальна€ ширина символа в пиксел€х
-	do {
-		cout << " Enter the maximum width of a character... ";
-		cin >> maxInterval;
-	} while (maxInterval<minInterval+1 || maxInterval > width);
-
-	// допустимый процент наложени€ гипотез
-	do {
-		cout << " Enter the percentage of overlapping characters... ";
-		cin >> percentOverlay;
-	} while (percentOverlay<0 || percentOverlay > 100);
+		// допустимый процент наложени€ гипотез
+		do {
+			cout << " Enter the percentage of overlapping characters... ";
+			cin >> percentOverlay;
+		} while (percentOverlay<0 || percentOverlay > 100);
+	}
 }
 
 					/*	методы класса Compliance */
@@ -560,7 +562,7 @@ void Strainer::selection(Image& image, Settings& user)
 	{
 #pragma omp for schedule (guided) private(MinCD) firstprivate(nearestMatch,j) lastprivate(leftEdge)
 		// цикл в котором смещаетс€ права€ граница наложени€ фильтров
-		for (leftEdge = user.stepOffset; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
+		for (leftEdge = 0; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
 		{	
 			if (image.extremum(leftEdge, user.stepOffset, user.widthMask))
 			{

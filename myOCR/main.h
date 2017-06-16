@@ -125,7 +125,7 @@ private:
 	unsigned int maxInterval;		// максимальная ширина символа в пикселях
 	float percentOverlay;			// допустимый процент наложения гипотез
 public:
-	Settings(unsigned int width);
+	Settings(const mode& md, unsigned int width);
 	Settings(int wM, int sO, int minIn, int maxIn, float pO)
 		: widthMask(wM), stepOffset(sO), minInterval(minIn), maxInterval(maxIn),
 		percentOverlay(pO)
