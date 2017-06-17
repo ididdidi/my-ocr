@@ -1,12 +1,15 @@
 #pragma once
+#include "stdafx.h"
+
+
 #ifndef MAINHEAD
 #define MAINHEAD
-#define QF 16							// Количество фильров
+#define QF 16							// Количество фильтров
 
 enum mode { detection, training };		// режимы работы программы 
 										// detection - распознавание, training - тренировка
 
-	// CIEXYZTRIPLE stuff
+										// CIEXYZTRIPLE stuff
 typedef int FXPT2DOT30;
 
 typedef struct {
@@ -70,11 +73,11 @@ mode getMode();
 // выбор изображения
 string getFileName();
 
-	// яркость пикселя
-class Pixel						
+// яркость пикселя
+class Pixel
 {
 private:
-	unsigned char brightness;			
+	unsigned char brightness;
 public:
 	Pixel() : brightness(0)
 	{}
@@ -82,7 +85,7 @@ public:
 	unsigned char& put();					// передать значение яркости
 };
 
-	// изображение в виде массива Pixel;
+// изображение в виде массива Pixel;
 class Image
 {
 private:
@@ -98,13 +101,13 @@ public:
 	{
 		delete[]pixel;
 	}
-	class ImageEx								// класс иключений
+	class ImageEx								// класс исключений
 	{
 	public:
 		string origin;							// для имени функции
 		string value;							// для хранения ошибочного значения;
 		string description;						// описание
-		ImageEx(string or , string vl, string desc) 
+		ImageEx(string or , string vl, string desc)
 			: origin(or ), value(vl), description(desc)
 		{ }
 	};
@@ -115,12 +118,12 @@ public:
 	bool extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask);
 };
 
-// параметры вводимые пользователем
+// параметры, вводимые пользователем
 class Settings
 {
 private:
 	unsigned int widthMask;			// ширина накладываемой маски при поиске экстреммум f1
-	unsigned int stepOffset;		// шаг смещения при поиске экстреммум f1
+	unsigned int stepOffset;		// шаг смещения при поиске экстремум f1
 	unsigned int minInterval;		// минимальная ширина символа в пикселях
 	unsigned int maxInterval;		// максимальная ширина символа в пикселях
 	float percentOverlay;			// допустимый процент наложения гипотез
@@ -134,18 +137,18 @@ public:
 	friend class Sample;
 	friend class Strainer;
 };
-	// находит, хранит, и записывает эталоны;
-class Sample								
+// находит, хранит, и записывает эталоны;
+class Sample
 {
 protected:
 	char match;								// номер эталона
-	float Filtered[QF];						// результатналожения фильтров;
+	float Filtered[QF];						// результат наложения фильтров;
 public:
 	Sample()
 	{
-		for (int i = 0; i < QF; i++)Filtered[i] = 0.0; // обнуляем массив рпи создании
+		for (int i = 0; i < QF; i++)Filtered[i] = 0.0; // обнуляем массив при создании
 	}
-	class SampleEx								// класс иключений
+	class SampleEx								// класс исключений
 	{
 	public:
 		string origin;							// для имени функции
@@ -156,27 +159,27 @@ public:
 		{ }
 	};
 	char returnMatch();						// вернуть номер эталона(символа)
-	void filtering(const Image& image, const unsigned int& x0, 
-					const unsigned int& xEnd);		// наложение фильтров;
-	void diskOut();									// запичсь значенйв файл
+	void filtering(const Image& image, const unsigned int& x0,
+		const unsigned int& xEnd);		// наложение фильтров;
+	void diskOut();									// запись значений в файл
 	char compareWithBase(float& MinCD);				// сравниваем с эталонами
 	float operator - (const Sample& matchFiltred);
-	void training(Image& image, Settings& user);	// добававление эталонов
+	void training(Image& image, Settings& user);	// добавление эталонов
 };
 
-	// данные о соответствии гипотез эталонам
+// данные о соответствии гипотез эталонам
 class Compliance
 {
 protected:
-	int x0;							// Начаольная координата искомого объекта;
+	int x0;							// Начальная координата искомого объекта;
 	int xEnd;						// конечная координата искомого объекта;
 	char nearestMatch;				// номер эталона ближайшего по значению признаков;
-	float CartesianDistance;		// декартово расстояние до ближайшего эталона;
+	float EuclideanMetric;		// расстояние до ближайшего эталона;
 public:
-	Compliance() : x0(0), xEnd(0), nearestMatch(0), CartesianDistance(0.0)
+	Compliance() : x0(0), xEnd(0), nearestMatch(0), EuclideanMetric(0.0)
 	{ }
 	Compliance(int X0, int End, int nM, float CD) :
-		x0(X0), xEnd(End), nearestMatch(nM), CartesianDistance(CD)
+		x0(X0), xEnd(End), nearestMatch(nM), EuclideanMetric(CD)
 	{ }
 	bool operator < (const Compliance& rhs)	// для сортировки
 	{
@@ -186,8 +189,8 @@ public:
 	friend class Strainer;
 };
 
-	// выборка совпадений
-class Strainer						
+// выборка совпадений
+class Strainer
 {
 protected:
 	list<Compliance> compliance;

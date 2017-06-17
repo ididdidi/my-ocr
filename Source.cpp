@@ -3,19 +3,19 @@
 // выбор режима
 mode getMode()
 {
-	char ch=0;
+	char ch = 0;
 	while (true)
 	{
 		cout << " Select mode: the detection(d) or training(t)...";
 		ch = _getch();
-		if (ch == 'd' || ch == 'D'){
+		if (ch == 'd' || ch == 'D') {
 			cout << " detection...";
 			return detection;
 		}
-		else if (ch == 't' || ch == 'T'){
-				cout << " training...";
-				return training;
-			 }
+		else if (ch == 't' || ch == 'T') {
+			cout << " training...";
+			return training;
+		}
 		cout << ch << " - not the right request" << endl;
 	}
 }
@@ -29,7 +29,7 @@ string getFileName()
 	return temp;
 }
 
-						/* методы класса Pixel */
+/* методы класса Pixel */
 
 // получить значение яркости пикселя
 void Pixel::get(const double& br)			// получить значение яркости
@@ -38,24 +38,24 @@ void Pixel::get(const double& br)			// получить значение яркости
 }
 
 // передать значение яркости пикселя
-unsigned char& Pixel::put()					
+unsigned char& Pixel::put()
 {
 	return brightness;
 }
-  
-						/* методы класса Image */
+
+/* методы класса Image */
 
 // конструктор = загрузчик информации с изображения
 Image::Image(string fileName)			// получает значения яркости из файла
 {
-	
+
 	// открываем файл
 	std::ifstream fileStream(fileName, std::ifstream::binary);
 	if (!fileStream) {
 		throw ImageEx("download image", fileName, " is not available!");
 	}
 
-	// заголовк изображения
+	// заголовок изображения
 	BITMAPFILEHEADER fileHeader;
 	read(fileStream, fileHeader.bfType, sizeof(fileHeader.bfType));
 	read(fileStream, fileHeader.bfSize, sizeof(fileHeader.bfSize));
@@ -64,7 +64,7 @@ Image::Image(string fileName)			// получает значения яркости из файла
 	read(fileStream, fileHeader.bfOffBits, sizeof(fileHeader.bfOffBits));
 
 	if (fileHeader.bfType != 0x4D42) {
-		throw ImageEx("download image", fileName, " is not BMP file."); 
+		throw ImageEx("download image", fileName, " is not BMP file.");
 	}
 
 	// информация изображения
@@ -167,8 +167,8 @@ Image::Image(string fileName)			// получает значения яркости из файла
 
 	if (!(height*width)) {
 		throw ImageEx("download image", fileName, " less than one pixel.");
-	}	
-		// создаём динамический массив для хранения значений ярокости	
+	}
+	// создаём динамический массив для хранения значений ярокости	
 	if (pixel)
 	{
 		delete[]pixel;
@@ -224,7 +224,7 @@ unsigned int Image::putWidth()const
 	return width;
 }
 
-// возвращает значение полученное от наложения фильтра F1
+// возвращает значение, полученное от наложения фильтра F1
 float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 {
 	float temp = 0.0;
@@ -240,10 +240,10 @@ float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 	return temp;
 }
 
-// возвращает значение яркости пикселя хранимое в массиве
+// возвращает значение яркости пикселя, хранимое в массиве
 unsigned char& Image::operator[](const unsigned int& numberPix)const
 {
-	if (numberPix > height*width){
+	if (numberPix > height*width) {
 		throw ImageEx("operator[]", " method", " left was out of bounds of the array");
 	}
 
@@ -259,25 +259,25 @@ bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned in
 			&& (valueF(posX, widthMask) < valueF(posX + stepOffset, widthMask))));
 }
 
-					/* методы класса Settings */
+/* методы класса Settings */
 
 // запрашивает у пользователя информацию о настройках
 Settings::Settings(const mode& operationMode, unsigned int width)
 {
-	// ширина накладываемой маски при поиске экстреммум f1
+	// ширина накладываемой маски при поиске экстремум f1
 	do {
 		cout << " Enter the width of the mask is a multiple of four... ";
 		cin >> widthMask;
-	} while (widthMask<1 || widthMask > width || widthMask%4);
+	} while (widthMask<1 || widthMask > width || widthMask % 4);
 
-	// шаг смещения при поиске экстреммум f1
+	// шаг смещения при поиске экстремум f1
 	do {
 		cout << " Enter the step offset of the mask... ";
 		cin >> stepOffset;
 	} while (stepOffset<1 || stepOffset > width);
-	
-	if(!operationMode){	// если распознавание то запарашиваем дополнительные параметры:
-		// минимальная ширина символа в пикселях
+
+	if (!operationMode) {	// если распознавание, то запрашиваем дополнительные параметры
+							// минимальная ширина символа в пикселях
 		do {
 			cout << " Enter the minimum width of a character... ";
 			cin >> minInterval;
@@ -287,7 +287,7 @@ Settings::Settings(const mode& operationMode, unsigned int width)
 		do {
 			cout << " Enter the maximum width of a character... ";
 			cin >> maxInterval;
-		} while (maxInterval<minInterval+1 || maxInterval > width);
+		} while (maxInterval<minInterval + 1 || maxInterval > width);
 
 		// допустимый процент наложения гипотез
 		do {
@@ -297,15 +297,15 @@ Settings::Settings(const mode& operationMode, unsigned int width)
 	}
 }
 
-					/*	методы класса Compliance */
+/*	методы класса Compliance */
 
 // выводит на экран данные о соответствии гипотез эталонам
 void Compliance::dispay()
 {
-	cout << endl << x0 << ' ' << xEnd << ' ' << nearestMatch << ' ' << CartesianDistance;
+	cout << endl << x0 << ' ' << xEnd << ' ' << nearestMatch << ' ' << EuclideanMetric;
 }
 
-						/*методы класса Sample */
+/*методы класса Sample */
 
 // возвращает эталон
 char Sample::returnMatch()
@@ -318,25 +318,25 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 {
 	unsigned int numberPix = x0;				// начальная координата наложения фильтра
 	unsigned int widthMask = (xEnd - x0) / 4;	// масштабируем фильтр по размеру отрезка
-	widthMask *= 4;								
+	widthMask *= 4;
 	unsigned int height = image.putHeight();	// высота изображения;
 	unsigned int width = image.putWidth();		// ширина изображения;
-	
-	// Последовательно пропускаем пиксели через каждый фильтир 
+
+												// Последовательно пропускаем пиксели через каждый фильтр 
 	for (unsigned int i = 0; i < height; i++)	// внешний цикл наложения фильтров
 	{
 		for (unsigned int j = 0; j < widthMask; j++, numberPix++) // внутренний цикл наложения фильтров
 		{
 			// Накладываем фильтр 0
-			{	
-				Filtered[0] += image[numberPix]; 
+			{
+				Filtered[0] += image[numberPix];
 			}
 			// Накладываем фильтр 1										
 			{
 				if (j < (width / 2)) Filtered[1] -= image[numberPix];
 				else Filtered[1] += image[numberPix];
-			}	
-		    // Накладываем фильтр 2
+			}
+			// Накладываем фильтр 2
 			{
 				if (i < (height / 2)) Filtered[2] -= image[numberPix];
 				else Filtered[2] += image[numberPix];
@@ -348,7 +348,7 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 			}
 			// Накладываем фильтр 4
 			{
-				if (j <= (widthMask / 4) || j > (widthMask * 3 / 4)) Filtered[4] -= image[numberPix];
+				if (j <= (widthMask / 4) || j >(widthMask * 3 / 4)) Filtered[4] -= image[numberPix];
 				else Filtered[4] += image[numberPix];
 			}
 			// Накладываем фильтр 5
@@ -378,7 +378,7 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 			}
 			// Накладываем фильтр 9
 			{
-				if ((j > (widthMask / 4) && j <= (widthMask / 2)) || j >= (widthMask * 3 / 4))
+				if ((j >(widthMask / 4) && j <= (widthMask / 2)) || j >= (widthMask * 3 / 4))
 					Filtered[9] -= image[numberPix];
 				else Filtered[9] += image[numberPix];
 			}
@@ -430,23 +430,23 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 	}
 }
 
-// Запись новых эталонов в конец файла - баыз данных
-void Sample::diskOut()						
+// Запись новых эталонов в конец файла - базы данных
+void Sample::diskOut()
 {
-		cout << "\tRecord a sample in the database";
+	cout << "\tRecord a sample in the database";
 	cout << "\t\tEnter the symbol... ";  cin >> match;
 
-	ofstream outfile;						// созадан поток вывода
+	ofstream outfile;						// создан поток вывода
 	outfile.open("MatchBase.dat", ios::app | ios::out | ios::binary); // открыть для записи
-	outfile.write((char*)this, sizeof(*this));	// Объект записан;
+	outfile.write((char*)this, sizeof(*this));				// Объект записан;
 	if (!outfile) {
 		throw SampleEx("the entry of new matchs", "MatchBase.dat", "  is not writable!");
 	}
-	outfile.close();	
+	outfile.close();
 }
 
 // из результата наложения фильтра детектируемого изображения
-	//вычитает результат наложения фильтра на эталон
+//вычитает результат наложения фильтра на эталон
 float Sample::operator - (const Sample& match)
 {		// Евклидова метрика в виде цикла
 	long double tempDC = 0.0;
@@ -459,19 +459,19 @@ float Sample::operator - (const Sample& match)
 }
 
 //сравнивает с эталонами, возвращает ближайший
-char Sample::compareWithBase(float& MinCD) 
+char Sample::compareWithBase(float& MinCD)
 {											 // и расстояние до него(&MinCD);
 	char  nearestMatch = 0;
 	float tempCD;				// текущее значение Евклидова расстояния
 	Sample tempSample;			// буфер для временного хранения эталонов
 	fstream infile;				// открыть поток ввода из файла;
-	
+
 	infile.open("MatchBase.dat", ios::in | ios::binary);
 	if (!infile) {
 		exit(1);
 	}
-	
-	// считываем значения эталонв из обучающей выборки:
+
+	// считываем значения эталонов из обучающей выборки:
 	infile.read(reinterpret_cast<char*>(&tempSample), sizeof(tempSample));
 	while (!infile.eof())
 	{
@@ -482,7 +482,7 @@ char Sample::compareWithBase(float& MinCD)
 			MinCD = tempCD;					// сохраняем это как минимальное 
 											// запоминаем эталон как наиболее близкий
 			nearestMatch = tempSample.returnMatch();
-		}						// считываем значения эталонв из обучающей выборки:
+		}						// считываем значения эталонов из обучающей выборки:
 		infile.read(reinterpret_cast<char*>(&tempSample), sizeof(tempSample));
 	}
 	infile.close();
@@ -509,7 +509,7 @@ void Sample::training(Image& image, Settings& user)
 
 		char ch = 0;
 		// внешний цикл обработки. обход по ширине изображения с заданным шагом 
-		for ( ; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
+		for (; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
 		{
 			if (image.extremum(leftEdge, user.stepOffset, user.widthMask))
 			{
@@ -521,7 +521,7 @@ void Sample::training(Image& image, Settings& user)
 						cout << "The actual border: l = " << leftEdge << " r = " << rightEdge;
 						cout << "To preserve the value found(y/n)? ";
 						cin >> ch;
-						// сохраняем если устраивает
+						// сохраняем, если устраивает
 						if (ch == 'y' || ch == 'Y')
 						{
 							for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
@@ -541,7 +541,7 @@ void Sample::training(Image& image, Settings& user)
 	} while (resume == 'y' || resume == 'Y');
 }
 
-						/* методы класса Strainer */
+/* методы класса Strainer */
 
 // поиск соответствий эталонам
 void Strainer::selection(Image& image, Settings& user)
@@ -553,7 +553,7 @@ void Strainer::selection(Image& image, Settings& user)
 	float MinCD;				// минимальное Евклидово расстояние
 	char  nearestMatch = 0;		// ближайший эталон
 	cout << "\nselection..." << endl;
-						// внешний цикл обработки. обход по ширине изображения с заданным шагом 
+	// внешний цикл обработки. обход по ширине изображения с заданным шагом 
 	omp_lock_t lock;
 	omp_init_lock(&lock);
 	int dinamic_threads = omp_get_dynamic();
@@ -561,30 +561,30 @@ void Strainer::selection(Image& image, Settings& user)
 #pragma omp parallel 
 	{
 #pragma omp for schedule (guided) private(MinCD) firstprivate(nearestMatch,j) lastprivate(leftEdge)
-		// цикл в котором смещается правая граница наложения фильтров
+		// цикл, в котором смещается правая граница наложения фильтров
 		for (leftEdge = 0; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
-		{	
+		{
 			if (image.extremum(leftEdge, user.stepOffset, user.widthMask))
 			{
 				j = leftEdge + user.maxInterval;	// ищем правую границу искомого объекта(через экстремуму);
-				// цикл в котором смещаестя левая граница наложения фильтров
+													// цикл в котором смещается левая граница наложения фильтров
 				while ((j - leftEdge > user.minInterval) && (j < width))
-				{	
+				{
 					if (image.extremum(j, 1, user.widthMask))
 					{
 						Sample temp;	// хранит результат наложения фильтров на фрагмет изображения
 						temp.filtering(image, leftEdge, j);	// наложение фильтров
 						nearestMatch = temp.compareWithBase(MinCD);	// находим расстояние до ближайшего эталона 
 						omp_set_lock(&lock);						// замок для корректного добавления значений в список
-								// добавим найденое значение в список
+																	// добавим найденное значение в список
 						compliance.push_back(Compliance(leftEdge, j, nearestMatch, MinCD));
 						omp_unset_lock(&lock);						// снимем замок
 					}
-					j--;		// правая граница смещается справа на лево
+					j--;		// правая граница смещается справа налево
 				}
 			}
 		}
-    }
+	}
 	omp_set_dynamic(dinamic_threads);
 	omp_destroy_lock(&lock);
 }
@@ -592,22 +592,22 @@ void Strainer::selection(Image& image, Settings& user)
 // убирает лишние значения
 void Strainer::minimize(Settings& user)
 {
-	compliance.sort();			// сортируем по занчению x0(координата начала);
-	list<Compliance>::iterator  thisIter, newIter;	//сохздаём итераторы
+	compliance.sort();			// сортируем по значению x0(координата начала);
+	list<Compliance>::iterator  thisIter, newIter;	//создаём итераторы
 	thisIter = compliance.begin();				// инициализируем итераторы
 	newIter = compliance.begin();
-	newIter++;								// смещеаме правый итератор 
+	newIter++;								// смещаем правый итератор 
 
-	for (; newIter != compliance.end();)		// пока правый итератор указывает на элемент списка
+	for (; newIter != compliance.end();)		// пока правый итератор указывает на элемент список
 	{
 		float layering = (thisIter->xEnd - newIter->x0); // найдём ширину наложения в пикселях
-					// найдём ширину того из символов, который меньше:
+														 // найдём ширину того из символов, который меньше:
 		float minW = (((thisIter->xEnd - thisIter->x0) < (newIter->xEnd - newIter->x0)) ?
-						(thisIter->xEnd - thisIter->x0) : (newIter->xEnd - newIter->x0));
-				// сравниваем соотношение ширины наложения и ширины символа с допустимым процентом наложения
-		if(layering / minW > (user.percentOverlay / 100)) 
-				// сохраняем сивол с наименьшим Евклидовым расстоянием до одного из эталонов
-			if (thisIter->CartesianDistance > newIter->CartesianDistance)
+			(thisIter->xEnd - thisIter->x0) : (newIter->xEnd - newIter->x0));
+		// сравниваем соотношение ширины наложения и ширины символа с допустимым процентом наложения
+		if (layering / minW > (user.percentOverlay / 100))
+			// сохраняем символ с наименьшим Евклидовым расстоянием до одного из эталонов
+			if (thisIter->EuclideanMetric > newIter->EuclideanMetric)
 			{
 				thisIter = compliance.erase(thisIter);
 				newIter++;
@@ -624,7 +624,7 @@ void Strainer::minimize(Settings& user)
 	}
 }
 
-// вывод списка с найдеными символами на экран
+// вывод списка с найденными символами на экран
 void Strainer::display()
 {
 	cout << "\nresult:" << endl;
