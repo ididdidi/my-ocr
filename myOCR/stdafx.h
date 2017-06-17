@@ -18,7 +18,6 @@
 #include <omp.h>
 using namespace std;
 
-#include "targetver.h"
 #include "main.h"
 
 
