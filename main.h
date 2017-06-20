@@ -4,10 +4,10 @@
 
 #ifndef MAINHEAD
 #define MAINHEAD
-#define QF 16							// Количество фильтров
+#define QF 16							// РљРѕР»РёС‡РµСЃС‚РІРѕ С„РёР»СЊС‚СЂРѕРІ
 
-enum mode { detection, training };		// режимы работы программы 
-										// detection - распознавание, training - тренировка
+enum mode { detection, training };		// СЂРµР¶РёРјС‹ СЂР°Р±РѕС‚С‹ РїСЂРѕРіСЂР°РјРјС‹ 
+										// detection - СЂР°СЃРїРѕР·РЅР°РІР°РЅРёРµ, training - С‚СЂРµРЅРёСЂРѕРІРєР°
 
 										// CIEXYZTRIPLE stuff
 typedef int FXPT2DOT30;
@@ -67,13 +67,13 @@ void read(std::ifstream &fp, Type &result, std::size_t size) {
 	fp.read(reinterpret_cast<char*>(&result), size);
 }
 
-// выбор режима
+// РІС‹Р±РѕСЂ СЂРµР¶РёРјР°
 mode getMode();
 
-// выбор изображения
+// РІС‹Р±РѕСЂ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 string getFileName();
 
-// яркость пикселя
+// СЏСЂРєРѕСЃС‚СЊ РїРёРєСЃРµР»СЏ
 class Pixel
 {
 private:
@@ -81,32 +81,32 @@ private:
 public:
 	Pixel() : brightness(0)
 	{}
-	void get(const double& br);				// получить значение яркости
-	unsigned char& put();					// передать значение яркости
+	void get(const double& br);				// РїРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ СЏСЂРєРѕСЃС‚Рё
+	unsigned char& put();					// РїРµСЂРµРґР°С‚СЊ Р·РЅР°С‡РµРЅРёРµ СЏСЂРєРѕСЃС‚Рё
 };
 
-// изображение в виде массива Pixel;
+// РёР·РѕР±СЂР°Р¶РµРЅРёРµ РІ РІРёРґРµ РјР°СЃСЃРёРІР° Pixel;
 class Image
 {
 private:
-	Image(const Image&) {}						// Конструктор копирования;
+	Image(const Image&) {}						// РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РєРѕРїРёСЂРѕРІР°РЅРёСЏ;
 protected:
-	Pixel* pixel;								// указатель на массив;
-	unsigned int height;						// высота изображение;
-	unsigned int width;							// ширина изображения;
+	Pixel* pixel;								// СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РјР°СЃСЃРёРІ;
+	unsigned int height;						// РІС‹СЃРѕС‚Р° РёР·РѕР±СЂР°Р¶РµРЅРёРµ;
+	unsigned int width;							// С€РёСЂРёРЅР° РёР·РѕР±СЂР°Р¶РµРЅРёСЏ;
 	unsigned char bitextract(const unsigned int byte, const unsigned int mask);
 public:
-	Image(string fileName); 						// конструктор
+	Image(string fileName); 						// РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ
 	~Image()
 	{
 		delete[]pixel;
 	}
-	class ImageEx								// класс исключений
+	class ImageEx								// РєР»Р°СЃСЃ РёСЃРєР»СЋС‡РµРЅРёР№
 	{
 	public:
-		string origin;							// для имени функции
-		string value;							// для хранения ошибочного значения;
-		string description;						// описание
+		string origin;							// РґР»СЏ РёРјРµРЅРё С„СѓРЅРєС†РёРё
+		string value;							// РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РѕС€РёР±РѕС‡РЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ;
+		string description;						// РѕРїРёСЃР°РЅРёРµ
 		ImageEx(string or , string vl, string desc)
 			: origin(or ), value(vl), description(desc)
 		{ }
@@ -118,15 +118,15 @@ public:
 	bool extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask);
 };
 
-// параметры, вводимые пользователем
+// РїР°СЂР°РјРµС‚СЂС‹, РІРІРѕРґРёРјС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј
 class Settings
 {
 private:
-	unsigned int widthMask;			// ширина накладываемой маски при поиске экстреммум f1
-	unsigned int stepOffset;		// шаг смещения при поиске экстремум f1
-	unsigned int minInterval;		// минимальная ширина символа в пикселях
-	unsigned int maxInterval;		// максимальная ширина символа в пикселях
-	float percentOverlay;			// допустимый процент наложения гипотез
+	unsigned int widthMask;			// С€РёСЂРёРЅР° РЅР°РєР»Р°РґС‹РІР°РµРјРѕР№ РјР°СЃРєРё РїСЂРё РїРѕРёСЃРєРµ СЌРєСЃС‚СЂРµРјРјСѓРј f1
+	unsigned int stepOffset;		// С€Р°Рі СЃРјРµС‰РµРЅРёСЏ РїСЂРё РїРѕРёСЃРєРµ СЌРєСЃС‚СЂРµРјСѓРј f1
+	unsigned int minInterval;		// РјРёРЅРёРјР°Р»СЊРЅР°СЏ С€РёСЂРёРЅР° СЃРёРјРІРѕР»Р° РІ РїРёРєСЃРµР»СЏС…
+	unsigned int maxInterval;		// РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ С€РёСЂРёРЅР° СЃРёРјРІРѕР»Р° РІ РїРёРєСЃРµР»СЏС…
+	float percentOverlay;			// РґРѕРїСѓСЃС‚РёРјС‹Р№ РїСЂРѕС†РµРЅС‚ РЅР°Р»РѕР¶РµРЅРёСЏ РіРёРїРѕС‚РµР·
 public:
 	Settings(const mode& md, unsigned int width);
 	Settings(int wM, int sO, int minIn, int maxIn, float pO)
@@ -137,59 +137,59 @@ public:
 	friend class Sample;
 	friend class Strainer;
 };
-// находит, хранит, и записывает эталоны;
+// РЅР°С…РѕРґРёС‚, С…СЂР°РЅРёС‚, Рё Р·Р°РїРёСЃС‹РІР°РµС‚ СЌС‚Р°Р»РѕРЅС‹;
 class Sample
 {
 protected:
-	char match;								// номер эталона
-	float Filtered[QF];						// результат наложения фильтров;
+	char match;								// РЅРѕРјРµСЂ СЌС‚Р°Р»РѕРЅР°
+	float Filtered[QF];						// СЂРµР·СѓР»СЊС‚Р°С‚ РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂРѕРІ;
 public:
 	Sample()
 	{
-		for (int i = 0; i < QF; i++)Filtered[i] = 0.0; // обнуляем массив при создании
+		for (int i = 0; i < QF; i++)Filtered[i] = 0.0; // РѕР±РЅСѓР»СЏРµРј РјР°СЃСЃРёРІ РїСЂРё СЃРѕР·РґР°РЅРёРё
 	}
-	class SampleEx								// класс исключений
+	class SampleEx								// РєР»Р°СЃСЃ РёСЃРєР»СЋС‡РµРЅРёР№
 	{
 	public:
-		string origin;							// для имени функции
-		string value;							// для хранения ошибочного значения;
-		string description;						// описание
+		string origin;							// РґР»СЏ РёРјРµРЅРё С„СѓРЅРєС†РёРё
+		string value;							// РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РѕС€РёР±РѕС‡РЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ;
+		string description;						// РѕРїРёСЃР°РЅРёРµ
 		SampleEx(string or , string vl, string desc)
 			: origin(or ), value(vl), description(desc)
 		{ }
 	};
-	char returnMatch();						// вернуть номер эталона(символа)
+	char returnMatch();						// РІРµСЂРЅСѓС‚СЊ РЅРѕРјРµСЂ СЌС‚Р°Р»РѕРЅР°(СЃРёРјРІРѕР»Р°)
 	void filtering(const Image& image, const unsigned int& x0,
-		const unsigned int& xEnd);		// наложение фильтров;
-	void diskOut();									// запись значений в файл
-	char compareWithBase(float& MinCD);				// сравниваем с эталонами
+		const unsigned int& xEnd);		// РЅР°Р»РѕР¶РµРЅРёРµ С„РёР»СЊС‚СЂРѕРІ;
+	void diskOut();									// Р·Р°РїРёСЃСЊ Р·РЅР°С‡РµРЅРёР№ РІ С„Р°Р№Р»
+	char compareWithBase(float& MinCD);				// СЃСЂР°РІРЅРёРІР°РµРј СЃ СЌС‚Р°Р»РѕРЅР°РјРё
 	float operator - (const Sample& matchFiltred);
-	void training(Image& image, Settings& user);	// добавление эталонов
+	void training(Image& image, Settings& user);	// РґРѕР±Р°РІР»РµРЅРёРµ СЌС‚Р°Р»РѕРЅРѕРІ
 };
 
-// данные о соответствии гипотез эталонам
+// РґР°РЅРЅС‹Рµ Рѕ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё РіРёРїРѕС‚РµР· СЌС‚Р°Р»РѕРЅР°Рј
 class Compliance
 {
 protected:
-	int x0;							// Начальная координата искомого объекта;
-	int xEnd;						// конечная координата искомого объекта;
-	char nearestMatch;				// номер эталона ближайшего по значению признаков;
-	float EuclideanMetric;		// расстояние до ближайшего эталона;
+	int x0;							// РќР°С‡Р°Р»СЊРЅР°СЏ РєРѕРѕСЂРґРёРЅР°С‚Р° РёСЃРєРѕРјРѕРіРѕ РѕР±СЉРµРєС‚Р°;
+	int xEnd;						// РєРѕРЅРµС‡РЅР°СЏ РєРѕРѕСЂРґРёРЅР°С‚Р° РёСЃРєРѕРјРѕРіРѕ РѕР±СЉРµРєС‚Р°;
+	char nearestMatch;				// РЅРѕРјРµСЂ СЌС‚Р°Р»РѕРЅР° Р±Р»РёР¶Р°Р№С€РµРіРѕ РїРѕ Р·РЅР°С‡РµРЅРёСЋ РїСЂРёР·РЅР°РєРѕРІ;
+	float EuclideanMetric;		// СЂР°СЃСЃС‚РѕСЏРЅРёРµ РґРѕ Р±Р»РёР¶Р°Р№С€РµРіРѕ СЌС‚Р°Р»РѕРЅР°;
 public:
 	Compliance() : x0(0), xEnd(0), nearestMatch(0), EuclideanMetric(0.0)
 	{ }
 	Compliance(int X0, int End, int nM, float CD) :
 		x0(X0), xEnd(End), nearestMatch(nM), EuclideanMetric(CD)
 	{ }
-	bool operator < (const Compliance& rhs)	// для сортировки
+	bool operator < (const Compliance& rhs)	// РґР»СЏ СЃРѕСЂС‚РёСЂРѕРІРєРё
 	{
 		return x0 < rhs.x0;
 	}
-	void dispay();					// вывод на экран
+	void dispay();					// РІС‹РІРѕРґ РЅР° СЌРєСЂР°РЅ
 	friend class Strainer;
 };
 
-// выборка совпадений
+// РІС‹Р±РѕСЂРєР° СЃРѕРІРїР°РґРµРЅРёР№
 class Strainer
 {
 protected:
@@ -197,10 +197,11 @@ protected:
 public:
 	Strainer(Image& image, Settings& user)
 	{
-		selection(image, user);			// ищем совпадения с эталонами
+		selection(image, user);			// РёС‰РµРј СЃРѕРІРїР°РґРµРЅРёСЏ СЃ СЌС‚Р°Р»РѕРЅР°РјРё
 	}
-	void selection(Image& image, Settings& user);	// поиск совпадений
-	void minimize(Settings& user);		// удаление лишних совпадений
-	void display();						// вывод результата  поиска совпадений
+	void selection(Image& image, Settings& user);	// РїРѕРёСЃРє СЃРѕРІРїР°РґРµРЅРёР№
+	void minimize(Settings& user);		// СѓРґР°Р»РµРЅРёРµ Р»РёС€РЅРёС… СЃРѕРІРїР°РґРµРЅРёР№
+	void display();						// РІС‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚Р°  РїРѕРёСЃРєР° СЃРѕРІРїР°РґРµРЅРёР№
 };
 #endif // !MAINHEAD
+
