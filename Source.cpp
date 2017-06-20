@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-// выбор режима
+// РІС‹Р±РѕСЂ СЂРµР¶РёРјР°
 mode getMode()
 {
 	char ch = 0;
@@ -20,7 +20,7 @@ mode getMode()
 	}
 }
 
-// выбор изображения
+// РІС‹Р±РѕСЂ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 string getFileName()
 {
 	string temp;
@@ -29,33 +29,33 @@ string getFileName()
 	return temp;
 }
 
-/* методы класса Pixel */
+/* РјРµС‚РѕРґС‹ РєР»Р°СЃСЃР° Pixel */
 
-// получить значение яркости пикселя
-void Pixel::get(const double& br)			// получить значение яркости
+// РїРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ СЏСЂРєРѕСЃС‚Рё РїРёРєСЃРµР»СЏ
+void Pixel::get(const double& br)			// РїРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ СЏСЂРєРѕСЃС‚Рё
 {
 	brightness = static_cast<char>(br);
 }
 
-// передать значение яркости пикселя
+// РїРµСЂРµРґР°С‚СЊ Р·РЅР°С‡РµРЅРёРµ СЏСЂРєРѕСЃС‚Рё РїРёРєСЃРµР»СЏ
 unsigned char& Pixel::put()
 {
 	return brightness;
 }
 
-/* методы класса Image */
+/* РјРµС‚РѕРґС‹ РєР»Р°СЃСЃР° Image */
 
-// конструктор = загрузчик информации с изображения
-Image::Image(string fileName)			// получает значения яркости из файла
+// РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ = Р·Р°РіСЂСѓР·С‡РёРє РёРЅС„РѕСЂРјР°С†РёРё СЃ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+Image::Image(string fileName)			// РїРѕР»СѓС‡Р°РµС‚ Р·РЅР°С‡РµРЅРёСЏ СЏСЂРєРѕСЃС‚Рё РёР· С„Р°Р№Р»Р°
 {
 
-	// открываем файл
+	// РѕС‚РєСЂС‹РІР°РµРј С„Р°Р№Р»
 	std::ifstream fileStream(fileName, std::ifstream::binary);
 	if (!fileStream) {
 		throw ImageEx("download image", fileName, " is not available!");
 	}
 
-	// заголовок изображения
+	// Р·Р°РіРѕР»РѕРІРѕРє РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 	BITMAPFILEHEADER fileHeader;
 	read(fileStream, fileHeader.bfType, sizeof(fileHeader.bfType));
 	read(fileStream, fileHeader.bfSize, sizeof(fileHeader.bfSize));
@@ -67,7 +67,7 @@ Image::Image(string fileName)			// получает значения яркости из файла
 		throw ImageEx("download image", fileName, " is not BMP file.");
 	}
 
-	// информация изображения
+	// РёРЅС„РѕСЂРјР°С†РёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 	BITMAPINFOHEADER fileInfoHeader;
 	read(fileStream, fileInfoHeader.biSize, sizeof(fileInfoHeader.biSize));
 
@@ -79,7 +79,7 @@ Image::Image(string fileName)			// получает значения яркости из файла
 		read(fileStream, fileInfoHeader.biBitCount, sizeof(fileInfoHeader.biBitCount));
 	}
 
-	// получаем информацию о битности
+	// РїРѕР»СѓС‡Р°РµРј РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р±РёС‚РЅРѕСЃС‚Рё
 	int colorsCount = fileInfoHeader.biBitCount >> 3;
 	if (colorsCount < 3) {
 		colorsCount = 3;
@@ -109,7 +109,7 @@ Image::Image(string fileName)			// получает значения яркости из файла
 		read(fileStream, fileInfoHeader.biBlueMask, sizeof(fileInfoHeader.biBlueMask));
 	}
 
-	// если маска не задана, то ставим маску по умолчанию
+	// РµСЃР»Рё РјР°СЃРєР° РЅРµ Р·Р°РґР°РЅР°, С‚Рѕ СЃС‚Р°РІРёРј РјР°СЃРєСѓ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	if (fileInfoHeader.biRedMask == 0 || fileInfoHeader.biGreenMask == 0 || fileInfoHeader.biBlueMask == 0) {
 		fileInfoHeader.biRedMask = maskValue << (bitsOnColor * 2);
 		fileInfoHeader.biGreenMask = maskValue << bitsOnColor;
@@ -141,7 +141,7 @@ Image::Image(string fileName)			// получает значения яркости из файла
 		read(fileStream, fileInfoHeader.biReserved, sizeof(fileInfoHeader.biReserved));
 	}
 
-	// проверка на поддерку этой версии формата
+	// РїСЂРѕРІРµСЂРєР° РЅР° РїРѕРґРґРµСЂРєСѓ СЌС‚РѕР№ РІРµСЂСЃРёРё С„РѕСЂРјР°С‚Р°
 	if (fileInfoHeader.biSize != 12 && fileInfoHeader.biSize != 40 && fileInfoHeader.biSize != 52 &&
 		fileInfoHeader.biSize != 56 && fileInfoHeader.biSize != 108 && fileInfoHeader.biSize != 124) {
 		throw ImageEx("download image", fileName, " unsupported BMP format.");
@@ -155,20 +155,20 @@ Image::Image(string fileName)			// получает значения яркости из файла
 		throw ImageEx("download image", fileName, " unsupported BMP compression.");
 	}
 
-	// сохранение данных в классе Image
+	// СЃРѕС…СЂР°РЅРµРЅРёРµ РґР°РЅРЅС‹С… РІ РєР»Р°СЃСЃРµ Image
 	unsigned int bufer;
 
 	height = fileInfoHeader.biHeight;
 	width = fileInfoHeader.biWidth;
 
-	// определение размера отступа в конце каждой строки
+	// РѕРїСЂРµРґРµР»РµРЅРёРµ СЂР°Р·РјРµСЂР° РѕС‚СЃС‚СѓРїР° РІ РєРѕРЅС†Рµ РєР°Р¶РґРѕР№ СЃС‚СЂРѕРєРё
 	int linePadding = ((fileInfoHeader.biWidth * (fileInfoHeader.biBitCount / 8)) % 4) & 3;
 
 
 	if (!(height*width)) {
 		throw ImageEx("download image", fileName, " less than one pixel.");
 	}
-	// создаём динамический массив для хранения значений ярокости	
+	// СЃРѕР·РґР°С‘Рј РґРёРЅР°РјРёС‡РµСЃРєРёР№ РјР°СЃСЃРёРІ РґР»СЏ С…СЂР°РЅРµРЅРёСЏ Р·РЅР°С‡РµРЅРёР№ СЏСЂРѕРєРѕСЃС‚Рё	
 	if (pixel)
 	{
 		delete[]pixel;
@@ -177,7 +177,7 @@ Image::Image(string fileName)			// получает значения яркости из файла
 	int i = 0;
 	unsigned int j = 0;
 
-	// вычисляем значения яркости пикселей и сохраняем их в динамический массив
+	// РІС‹С‡РёСЃР»СЏРµРј Р·РЅР°С‡РµРЅРёСЏ СЏСЂРєРѕСЃС‚Рё РїРёРєСЃРµР»РµР№ Рё СЃРѕС…СЂР°РЅСЏРµРј РёС… РІ РґРёРЅР°РјРёС‡РµСЃРєРёР№ РјР°СЃСЃРёРІ
 #pragma omp parallel num_threads(omp_get_max_threads()/2)
 	{
 #pragma omp for schedule (guided) firstprivate(j) lastprivate(i) ordered
@@ -198,7 +198,7 @@ unsigned char Image::bitextract(const unsigned int byte, const unsigned int mask
 		return 0;
 	}
 
-	// определение количества нулевых бит справа от маски
+	// РѕРїСЂРµРґРµР»РµРЅРёРµ РєРѕР»РёС‡РµСЃС‚РІР° РЅСѓР»РµРІС‹С… Р±РёС‚ СЃРїСЂР°РІР° РѕС‚ РјР°СЃРєРё
 	int
 		maskBufer = mask,
 		maskPadding = 0;
@@ -208,23 +208,23 @@ unsigned char Image::bitextract(const unsigned int byte, const unsigned int mask
 		maskPadding++;
 	}
 
-	// применение маски и смещение
+	// РїСЂРёРјРµРЅРµРЅРёРµ РјР°СЃРєРё Рё СЃРјРµС‰РµРЅРёРµ
 	return (byte & mask) >> maskPadding;
 }
 
-// возвращает значение высоты в пикселях
+// РІРѕР·РІСЂР°С‰Р°РµС‚ Р·РЅР°С‡РµРЅРёРµ РІС‹СЃРѕС‚С‹ РІ РїРёРєСЃРµР»СЏС…
 unsigned int Image::putHeight()const
 {
 	return height;
 }
 
-// возвращает значение ширины в пикселях
+// РІРѕР·РІСЂР°С‰Р°РµС‚ Р·РЅР°С‡РµРЅРёРµ С€РёСЂРёРЅС‹ РІ РїРёРєСЃРµР»СЏС…
 unsigned int Image::putWidth()const
 {
 	return width;
 }
 
-// возвращает значение, полученное от наложения фильтра F1
+// РІРѕР·РІСЂР°С‰Р°РµС‚ Р·РЅР°С‡РµРЅРёРµ, РїРѕР»СѓС‡РµРЅРЅРѕРµ РѕС‚ РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂР° F1
 float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 {
 	float temp = 0.0;
@@ -240,7 +240,7 @@ float Image::valueF(unsigned int posX, const unsigned int& widthMask)
 	return temp;
 }
 
-// возвращает значение яркости пикселя, хранимое в массиве
+// РІРѕР·РІСЂР°С‰Р°РµС‚ Р·РЅР°С‡РµРЅРёРµ СЏСЂРєРѕСЃС‚Рё РїРёРєСЃРµР»СЏ, С…СЂР°РЅРёРјРѕРµ РІ РјР°СЃСЃРёРІРµ
 unsigned char& Image::operator[](const unsigned int& numberPix)const
 {
 	if (numberPix > height*width) {
@@ -250,7 +250,7 @@ unsigned char& Image::operator[](const unsigned int& numberPix)const
 	return pixel[numberPix].put();
 }
 
-// находит экстремумы графика полученного наложением фильтра F1 на изображение
+// РЅР°С…РѕРґРёС‚ СЌРєСЃС‚СЂРµРјСѓРјС‹ РіСЂР°С„РёРєР° РїРѕР»СѓС‡РµРЅРЅРѕРіРѕ РЅР°Р»РѕР¶РµРЅРёРµРј С„РёР»СЊС‚СЂР° F1 РЅР° РёР·РѕР±СЂР°Р¶РµРЅРёРµ
 bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned int& widthMask)
 {
 	return (((valueF(posX - stepOffset, widthMask) < valueF(posX, widthMask))
@@ -259,37 +259,37 @@ bool Image::extremum(unsigned int posX, const int& stepOffset, const unsigned in
 			&& (valueF(posX, widthMask) < valueF(posX + stepOffset, widthMask))));
 }
 
-/* методы класса Settings */
+/* РјРµС‚РѕРґС‹ РєР»Р°СЃСЃР° Settings */
 
-// запрашивает у пользователя информацию о настройках
+// Р·Р°РїСЂР°С€РёРІР°РµС‚ Сѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РЅР°СЃС‚СЂРѕР№РєР°С…
 Settings::Settings(const mode& operationMode, unsigned int width)
 {
-	// ширина накладываемой маски при поиске экстремум f1
+	// С€РёСЂРёРЅР° РЅР°РєР»Р°РґС‹РІР°РµРјРѕР№ РјР°СЃРєРё РїСЂРё РїРѕРёСЃРєРµ СЌРєСЃС‚СЂРµРјСѓРј f1
 	do {
 		cout << " Enter the width of the mask is a multiple of four... ";
 		cin >> widthMask;
 	} while (widthMask<1 || widthMask > width || widthMask % 4);
 
-	// шаг смещения при поиске экстремум f1
+	// С€Р°Рі СЃРјРµС‰РµРЅРёСЏ РїСЂРё РїРѕРёСЃРєРµ СЌРєСЃС‚СЂРµРјСѓРј f1
 	do {
 		cout << " Enter the step offset of the mask... ";
 		cin >> stepOffset;
 	} while (stepOffset<1 || stepOffset > width);
 
-	if (!operationMode) {	// если распознавание, то запрашиваем дополнительные параметры
-							// минимальная ширина символа в пикселях
+	if (!operationMode) {	// РµСЃР»Рё СЂР°СЃРїРѕР·РЅР°РІР°РЅРёРµ, С‚Рѕ Р·Р°РїСЂР°С€РёРІР°РµРј РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
+							// РјРёРЅРёРјР°Р»СЊРЅР°СЏ С€РёСЂРёРЅР° СЃРёРјРІРѕР»Р° РІ РїРёРєСЃРµР»СЏС…
 		do {
 			cout << " Enter the minimum width of a character... ";
 			cin >> minInterval;
 		} while (minInterval<1 || minInterval > width);
 
-		// максимальная ширина символа в пикселях
+		// РјР°РєСЃРёРјР°Р»СЊРЅР°СЏ С€РёСЂРёРЅР° СЃРёРјРІРѕР»Р° РІ РїРёРєСЃРµР»СЏС…
 		do {
 			cout << " Enter the maximum width of a character... ";
 			cin >> maxInterval;
 		} while (maxInterval<minInterval + 1 || maxInterval > width);
 
-		// допустимый процент наложения гипотез
+		// РґРѕРїСѓСЃС‚РёРјС‹Р№ РїСЂРѕС†РµРЅС‚ РЅР°Р»РѕР¶РµРЅРёСЏ РіРёРїРѕС‚РµР·
 		do {
 			cout << " Enter the percentage of overlapping characters... ";
 			cin >> percentOverlay;
@@ -297,78 +297,78 @@ Settings::Settings(const mode& operationMode, unsigned int width)
 	}
 }
 
-/*	методы класса Compliance */
+/*	РјРµС‚РѕРґС‹ РєР»Р°СЃСЃР° Compliance */
 
-// выводит на экран данные о соответствии гипотез эталонам
+// РІС‹РІРѕРґРёС‚ РЅР° СЌРєСЂР°РЅ РґР°РЅРЅС‹Рµ Рѕ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё РіРёРїРѕС‚РµР· СЌС‚Р°Р»РѕРЅР°Рј
 void Compliance::dispay()
 {
 	cout << endl << x0 << ' ' << xEnd << ' ' << nearestMatch << ' ' << EuclideanMetric;
 }
 
-/*методы класса Sample */
+/*РјРµС‚РѕРґС‹ РєР»Р°СЃСЃР° Sample */
 
-// возвращает эталон
+// РІРѕР·РІСЂР°С‰Р°РµС‚ СЌС‚Р°Р»РѕРЅ
 char Sample::returnMatch()
 {
 	return match;
 }
 
-// накладывает все 16 фильтров ТАВ
+// РЅР°РєР»Р°РґС‹РІР°РµС‚ РІСЃРµ 16 С„РёР»СЊС‚СЂРѕРІ РўРђР’
 void Sample::filtering(const Image& image, const unsigned int& x0, const unsigned int& xEnd)
 {
-	unsigned int numberPix = x0;				// начальная координата наложения фильтра
-	unsigned int widthMask = (xEnd - x0) / 4;	// масштабируем фильтр по размеру отрезка
+	unsigned int numberPix = x0;				// РЅР°С‡Р°Р»СЊРЅР°СЏ РєРѕРѕСЂРґРёРЅР°С‚Р° РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂР°
+	unsigned int widthMask = (xEnd - x0) / 4;	// РјР°СЃС€С‚Р°Р±РёСЂСѓРµРј С„РёР»СЊС‚СЂ РїРѕ СЂР°Р·РјРµСЂСѓ РѕС‚СЂРµР·РєР°
 	widthMask *= 4;
-	unsigned int height = image.putHeight();	// высота изображения;
-	unsigned int width = image.putWidth();		// ширина изображения;
+	unsigned int height = image.putHeight();	// РІС‹СЃРѕС‚Р° РёР·РѕР±СЂР°Р¶РµРЅРёСЏ;
+	unsigned int width = image.putWidth();		// С€РёСЂРёРЅР° РёР·РѕР±СЂР°Р¶РµРЅРёСЏ;
 
-												// Последовательно пропускаем пиксели через каждый фильтр 
-	for (unsigned int i = 0; i < height; i++)	// внешний цикл наложения фильтров
+												// РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РїСЂРѕРїСѓСЃРєР°РµРј РїРёРєСЃРµР»Рё С‡РµСЂРµР· РєР°Р¶РґС‹Р№ С„РёР»СЊС‚СЂ 
+	for (unsigned int i = 0; i < height; i++)	// РІРЅРµС€РЅРёР№ С†РёРєР» РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂРѕРІ
 	{
-		for (unsigned int j = 0; j < widthMask; j++, numberPix++) // внутренний цикл наложения фильтров
+		for (unsigned int j = 0; j < widthMask; j++, numberPix++) // РІРЅСѓС‚СЂРµРЅРЅРёР№ С†РёРєР» РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂРѕРІ
 		{
-			// Накладываем фильтр 0
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 0
 			{
 				Filtered[0] += image[numberPix];
 			}
-			// Накладываем фильтр 1										
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 1										
 			{
 				if (j < (width / 2)) Filtered[1] -= image[numberPix];
 				else Filtered[1] += image[numberPix];
 			}
-			// Накладываем фильтр 2
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 2
 			{
 				if (i < (height / 2)) Filtered[2] -= image[numberPix];
 				else Filtered[2] += image[numberPix];
 			}
-			// Накладываем фильтр 3
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 3
 			{
 				if ((2 * i / height + 2 * j / widthMask) % 2) Filtered[3] += image[numberPix];
 				else Filtered[3] -= image[numberPix];
 			}
-			// Накладываем фильтр 4
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 4
 			{
 				if (j <= (widthMask / 4) || j >(widthMask * 3 / 4)) Filtered[4] -= image[numberPix];
 				else Filtered[4] += image[numberPix];
 			}
-			// Накладываем фильтр 5
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 5
 			{
 				if (j <= (height / 4) || j > (height * 3 / 4)) Filtered[5] -= image[numberPix];
 				else Filtered[5] += image[numberPix];
 			}
-			// Накладываем фильтр 6
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 6
 			{
 				if (i <= (height / 2) && j <= (widthMask / 4) || i <= (height / 2) && j > (widthMask * 3 / 4) || i > (height / 2) && j > (widthMask / 4) && j <= (widthMask * 3 / 4))
 					Filtered[6] -= image[numberPix];
 				else Filtered[6] += image[numberPix];
 			}
-			// Накладываем фильтр 7
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 7
 			{
 				if (j <= (widthMask / 2) && i > (height / 4) && i <= (height * 3 / 4) || j > (widthMask / 2) && i <= (height / 4) || i > (height * 3 / 4) && j > (widthMask / 2))
 					Filtered[7] -= image[numberPix];
 				else Filtered[7] += image[numberPix];
 			}
-			// Накладываем фильтр 8
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 8
 			{
 				if (i > (height / 2) && j < (widthMask / 2) || i<(height / 2) && j>(widthMask / 2))
 					if ((i / (height / 4) + j / (widthMask / 4)) % 2) Filtered[8] += image[numberPix];
@@ -376,19 +376,19 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 				else if ((i / (height / 4) + j / (widthMask / 4)) % 2) Filtered[8] -= image[numberPix];
 				else Filtered[8] += image[numberPix];
 			}
-			// Накладываем фильтр 9
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 9
 			{
 				if ((j >(widthMask / 4) && j <= (widthMask / 2)) || j >= (widthMask * 3 / 4))
 					Filtered[9] -= image[numberPix];
 				else Filtered[9] += image[numberPix];
 			}
-			// Накладываем фильтр 10
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 10
 			{
 				if (i <= (height / 4) || (i > (height / 2) && i < (height * 3 / 4)))
 					Filtered[10] -= image[numberPix];
 				else Filtered[10] += image[numberPix];
 			}
-			// Накладываем фильтр 11
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 11
 			{
 				if (i <= (height / 2))
 					if (j>(widthMask / 4) && j <= (widthMask / 2) || j >= (widthMask * 3 / 4))Filtered[11] -= image[numberPix];
@@ -396,7 +396,7 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 				else if (j <= (widthMask / 4) || j>(widthMask / 2) && j<(widthMask * 3 / 4))Filtered[11] -= image[numberPix];
 				else Filtered[11] += image[numberPix];
 			}
-			// Накладываем фильтр 12
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 12
 			{
 				if (j<(widthMask / 2))
 					if ((i>(height / 4) && i <= (height / 2)) || i>(height * 3 / 4))Filtered[12] -= image[numberPix];
@@ -404,7 +404,7 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 				else if (i <= (height / 4) || (i >= (height / 2) && i<(height * 3 / 4)))Filtered[12] -= image[numberPix];
 				else Filtered[12] += image[numberPix];
 			}
-			// Накладываем фильтр 13
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 13
 			{
 				if (i<(height / 2))
 					if ((i / (height / 4) + j / (widthMask / 4)) % 2)Filtered[13] += image[numberPix];
@@ -412,7 +412,7 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 				else if ((i / (height / 4) + j / (widthMask / 4)) % 2)Filtered[13] -= image[numberPix];
 				else Filtered[13] += image[numberPix];
 			}
-			// Накладываем фильтр 14
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 14
 			{
 				if (j<(widthMask / 2))
 					if ((i / (height / 4) + j / (widthMask / 4)) % 2)Filtered[14] -= image[numberPix];
@@ -420,7 +420,7 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 				else if ((i / (height / 4) + j / (widthMask / 4)) % 2)Filtered[14] += image[numberPix];
 				else Filtered[14] -= image[numberPix];
 			}
-			// Накладываем фильтр 15
+			// РќР°РєР»Р°РґС‹РІР°РµРј С„РёР»СЊС‚СЂ 15
 			{
 				if ((i / (height / 4) + j / (widthMask / 4)) % 2)Filtered[15] += image[numberPix];
 				else Filtered[15] -= image[numberPix];
@@ -430,25 +430,25 @@ void Sample::filtering(const Image& image, const unsigned int& x0, const unsigne
 	}
 }
 
-// Запись новых эталонов в конец файла - базы данных
+// Р—Р°РїРёСЃСЊ РЅРѕРІС‹С… СЌС‚Р°Р»РѕРЅРѕРІ РІ РєРѕРЅРµС† С„Р°Р№Р»Р° - Р±Р°Р·С‹ РґР°РЅРЅС‹С…
 void Sample::diskOut()
 {
 	cout << "\tRecord a sample in the database";
 	cout << "\t\tEnter the symbol... ";  cin >> match;
 
-	ofstream outfile;						// создан поток вывода
-	outfile.open("MatchBase.dat", ios::app | ios::out | ios::binary); // открыть для записи
-	outfile.write((char*)this, sizeof(*this));				// Объект записан;
+	ofstream outfile;						// СЃРѕР·РґР°РЅ РїРѕС‚РѕРє РІС‹РІРѕРґР°
+	outfile.open("MatchBase.dat", ios::app | ios::out | ios::binary); // РѕС‚РєСЂС‹С‚СЊ РґР»СЏ Р·Р°РїРёСЃРё
+	outfile.write((char*)this, sizeof(*this));				// РћР±СЉРµРєС‚ Р·Р°РїРёСЃР°РЅ;
 	if (!outfile) {
 		throw SampleEx("the entry of new matchs", "MatchBase.dat", "  is not writable!");
 	}
 	outfile.close();
 }
 
-// из результата наложения фильтра детектируемого изображения
-//вычитает результат наложения фильтра на эталон
+// РёР· СЂРµР·СѓР»СЊС‚Р°С‚Р° РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂР° РґРµС‚РµРєС‚РёСЂСѓРµРјРѕРіРѕ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+//РІС‹С‡РёС‚Р°РµС‚ СЂРµР·СѓР»СЊС‚Р°С‚ РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂР° РЅР° СЌС‚Р°Р»РѕРЅ
 float Sample::operator - (const Sample& match)
-{		// Евклидова метрика в виде цикла
+{		// Р•РІРєР»РёРґРѕРІР° РјРµС‚СЂРёРєР° РІ РІРёРґРµ С†РёРєР»Р°
 	long double tempDC = 0.0;
 	for (int i = 0; i < QF; i++)
 	{
@@ -458,70 +458,70 @@ float Sample::operator - (const Sample& match)
 	return (float)(sqrt(tempDC));
 }
 
-//сравнивает с эталонами, возвращает ближайший
+//СЃСЂР°РІРЅРёРІР°РµС‚ СЃ СЌС‚Р°Р»РѕРЅР°РјРё, РІРѕР·РІСЂР°С‰Р°РµС‚ Р±Р»РёР¶Р°Р№С€РёР№
 char Sample::compareWithBase(float& MinCD)
-{											 // и расстояние до него(&MinCD);
+{											 // Рё СЂР°СЃСЃС‚РѕСЏРЅРёРµ РґРѕ РЅРµРіРѕ(&MinCD);
 	char  nearestMatch = 0;
-	float tempCD;				// текущее значение Евклидова расстояния
-	Sample tempSample;			// буфер для временного хранения эталонов
-	fstream infile;				// открыть поток ввода из файла;
+	float tempCD;				// С‚РµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ Р•РІРєР»РёРґРѕРІР° СЂР°СЃСЃС‚РѕСЏРЅРёСЏ
+	Sample tempSample;			// Р±СѓС„РµСЂ РґР»СЏ РІСЂРµРјРµРЅРЅРѕРіРѕ С…СЂР°РЅРµРЅРёСЏ СЌС‚Р°Р»РѕРЅРѕРІ
+	fstream infile;				// РѕС‚РєСЂС‹С‚СЊ РїРѕС‚РѕРє РІРІРѕРґР° РёР· С„Р°Р№Р»Р°;
 
 	infile.open("MatchBase.dat", ios::in | ios::binary);
 	if (!infile) {
 		exit(1);
 	}
 
-	// считываем значения эталонов из обучающей выборки:
+	// СЃС‡РёС‚С‹РІР°РµРј Р·РЅР°С‡РµРЅРёСЏ СЌС‚Р°Р»РѕРЅРѕРІ РёР· РѕР±СѓС‡Р°СЋС‰РµР№ РІС‹Р±РѕСЂРєРё:
 	infile.read(reinterpret_cast<char*>(&tempSample), sizeof(tempSample));
 	while (!infile.eof())
 	{
-		tempCD = *this - tempSample;	// находим Евклидово расстояние
+		tempCD = *this - tempSample;	// РЅР°С…РѕРґРёРј Р•РІРєР»РёРґРѕРІРѕ СЂР°СЃСЃС‚РѕСЏРЅРёРµ
 
-		if (!nearestMatch || MinCD > tempCD)// если это первое сравнение или  
-		{									// предыдущее Евклидово рсстояние больше
-			MinCD = tempCD;					// сохраняем это как минимальное 
-											// запоминаем эталон как наиболее близкий
+		if (!nearestMatch || MinCD > tempCD)// РµСЃР»Рё СЌС‚Рѕ РїРµСЂРІРѕРµ СЃСЂР°РІРЅРµРЅРёРµ РёР»Рё  
+		{									// РїСЂРµРґС‹РґСѓС‰РµРµ Р•РІРєР»РёРґРѕРІРѕ СЂСЃСЃС‚РѕСЏРЅРёРµ Р±РѕР»СЊС€Рµ
+			MinCD = tempCD;					// СЃРѕС…СЂР°РЅСЏРµРј СЌС‚Рѕ РєР°Рє РјРёРЅРёРјР°Р»СЊРЅРѕРµ 
+											// Р·Р°РїРѕРјРёРЅР°РµРј СЌС‚Р°Р»РѕРЅ РєР°Рє РЅР°РёР±РѕР»РµРµ Р±Р»РёР·РєРёР№
 			nearestMatch = tempSample.returnMatch();
-		}						// считываем значения эталонов из обучающей выборки:
+		}						// СЃС‡РёС‚С‹РІР°РµРј Р·РЅР°С‡РµРЅРёСЏ СЌС‚Р°Р»РѕРЅРѕРІ РёР· РѕР±СѓС‡Р°СЋС‰РµР№ РІС‹Р±РѕСЂРєРё:
 		infile.read(reinterpret_cast<char*>(&tempSample), sizeof(tempSample));
 	}
 	infile.close();
-	return nearestMatch;		// вернём ближайший эталон
+	return nearestMatch;		// РІРµСЂРЅС‘Рј Р±Р»РёР¶Р°Р№С€РёР№ СЌС‚Р°Р»РѕРЅ
 }
 
-// метод обучения с учителем
+// РјРµС‚РѕРґ РѕР±СѓС‡РµРЅРёСЏ СЃ СѓС‡РёС‚РµР»РµРј
 void Sample::training(Image& image, Settings& user)
 {
-	unsigned int width = image.putWidth(); // ширина изображения
-	unsigned int rightEdge = 0;			// правая граница исследуемого сегмента
-	unsigned int leftEdge = 0;				// текущая позиция по X
+	unsigned int width = image.putWidth(); // С€РёСЂРёРЅР° РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+	unsigned int rightEdge = 0;			// РїСЂР°РІР°СЏ РіСЂР°РЅРёС†Р° РёСЃСЃР»РµРґСѓРµРјРѕРіРѕ СЃРµРіРјРµРЅС‚Р°
+	unsigned int leftEdge = 0;				// С‚РµРєСѓС‰Р°СЏ РїРѕР·РёС†РёСЏ РїРѕ X
 
 	char resume;
-	do {					// цикл для необходимого числа повторений
-		do {				// просим ввести левую границу эталона
+	do {					// С†РёРєР» РґР»СЏ РЅРµРѕР±С…РѕРґРёРјРѕРіРѕ С‡РёСЃР»Р° РїРѕРІС‚РѕСЂРµРЅРёР№
+		do {				// РїСЂРѕСЃРёРј РІРІРµСЃС‚Рё Р»РµРІСѓСЋ РіСЂР°РЅРёС†Сѓ СЌС‚Р°Р»РѕРЅР°
 			cout << "\nEnter the left character border...";
 			cin >> leftEdge;
 		} while (leftEdge > (width - user.widthMask) || leftEdge < 0);
-		do {				// просим ввести правую границу эталона
+		do {				// РїСЂРѕСЃРёРј РІРІРµСЃС‚Рё РїСЂР°РІСѓСЋ РіСЂР°РЅРёС†Сѓ СЌС‚Р°Р»РѕРЅР°
 			cout << "Enter the right character border...";
 			cin >> rightEdge;
-		} while ((rightEdge - leftEdge) < user.minInterval || rightEdge > width || (rightEdge - leftEdge) > user.maxInterval);
+		} while (rightEdge < leftEdge || rightEdge > width);
 
 		char ch = 0;
-		// внешний цикл обработки. обход по ширине изображения с заданным шагом 
+		// РІРЅРµС€РЅРёР№ С†РёРєР» РѕР±СЂР°Р±РѕС‚РєРё. РѕР±С…РѕРґ РїРѕ С€РёСЂРёРЅРµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ СЃ Р·Р°РґР°РЅРЅС‹Рј С€Р°РіРѕРј 
 		for (; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
 		{
 			if (image.extremum(leftEdge, user.stepOffset, user.widthMask))
 			{
-				// ищем правую границу искомого объекта(через экстремуму);
-				while ((rightEdge - leftEdge > user.minInterval) && (rightEdge < width) && rightEdge > leftEdge)
+				// РёС‰РµРј РїСЂР°РІСѓСЋ РіСЂР°РЅРёС†Сѓ РёСЃРєРѕРјРѕРіРѕ РѕР±СЉРµРєС‚Р°(С‡РµСЂРµР· СЌРєСЃС‚СЂРµРјСѓРјСѓ);
+				while (rightEdge < width && rightEdge > leftEdge)
 				{
 					if (image.extremum(rightEdge, 1, user.widthMask))
 					{
 						cout << "The actual border: l = " << leftEdge << " r = " << rightEdge;
-						cout << "To preserve the value found(y/n)? ";
+						cout << " To preserve the value found(y/n)? ";
 						cin >> ch;
-						// сохраняем, если устраивает
+						// СЃРѕС…СЂР°РЅСЏРµРј, РµСЃР»Рё СѓСЃС‚СЂР°РёРІР°РµС‚
 						if (ch == 'y' || ch == 'Y')
 						{
 							for (int i = 0; i < QF; i++)Filtered[i] = 0.0;
@@ -534,26 +534,26 @@ void Sample::training(Image& image, Settings& user)
 				}
 			}
 			if (ch == 'y' || ch == 'Y')
-				break;		// выходим из цикла если сохранили эталон
+				break;		// РІС‹С…РѕРґРёРј РёР· С†РёРєР»Р° РµСЃР»Рё СЃРѕС…СЂР°РЅРёР»Рё СЌС‚Р°Р»РѕРЅ
 		}
 		cout << "Continue entering(y/n)? ";
-		resume = _getch();
+		resume = _getche();
 	} while (resume == 'y' || resume == 'Y');
 }
 
-/* методы класса Strainer */
+/* РјРµС‚РѕРґС‹ РєР»Р°СЃСЃР° Strainer */
 
-// поиск соответствий эталонам
+// РїРѕРёСЃРє СЃРѕРѕС‚РІРµС‚СЃС‚РІРёР№ СЌС‚Р°Р»РѕРЅР°Рј
 void Strainer::selection(Image& image, Settings& user)
 {
 
-	unsigned int width = image.putWidth();	// ширина изображения
-	unsigned int j = 0;			// правая граница исследуемого сегмента
+	unsigned int width = image.putWidth();	// С€РёСЂРёРЅР° РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+	unsigned int j = 0;			// РїСЂР°РІР°СЏ РіСЂР°РЅРёС†Р° РёСЃСЃР»РµРґСѓРµРјРѕРіРѕ СЃРµРіРјРµРЅС‚Р°
 	int leftEdge = 0;				// 
-	float MinCD;				// минимальное Евклидово расстояние
-	char  nearestMatch = 0;		// ближайший эталон
+	float MinCD;				// РјРёРЅРёРјР°Р»СЊРЅРѕРµ Р•РІРєР»РёРґРѕРІРѕ СЂР°СЃСЃС‚РѕСЏРЅРёРµ
+	char  nearestMatch = 0;		// Р±Р»РёР¶Р°Р№С€РёР№ СЌС‚Р°Р»РѕРЅ
 	cout << "\nselection..." << endl;
-	// внешний цикл обработки. обход по ширине изображения с заданным шагом 
+	// РІРЅРµС€РЅРёР№ С†РёРєР» РѕР±СЂР°Р±РѕС‚РєРё. РѕР±С…РѕРґ РїРѕ С€РёСЂРёРЅРµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ СЃ Р·Р°РґР°РЅРЅС‹Рј С€Р°РіРѕРј 
 	omp_lock_t lock;
 	omp_init_lock(&lock);
 	int dinamic_threads = omp_get_dynamic();
@@ -561,26 +561,26 @@ void Strainer::selection(Image& image, Settings& user)
 #pragma omp parallel 
 	{
 #pragma omp for schedule (guided) private(MinCD) firstprivate(nearestMatch,j) lastprivate(leftEdge)
-		// цикл, в котором смещается правая граница наложения фильтров
+		// С†РёРєР», РІ РєРѕС‚РѕСЂРѕРј СЃРјРµС‰Р°РµС‚СЃСЏ РїСЂР°РІР°СЏ РіСЂР°РЅРёС†Р° РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂРѕРІ
 		for (leftEdge = 0; leftEdge < width - user.widthMask; leftEdge += user.stepOffset)
 		{
 			if (image.extremum(leftEdge, user.stepOffset, user.widthMask))
 			{
-				j = leftEdge + user.maxInterval;	// ищем правую границу искомого объекта(через экстремуму);
-													// цикл в котором смещается левая граница наложения фильтров
+				j = leftEdge + user.maxInterval;	// РёС‰РµРј РїСЂР°РІСѓСЋ РіСЂР°РЅРёС†Сѓ РёСЃРєРѕРјРѕРіРѕ РѕР±СЉРµРєС‚Р°(С‡РµСЂРµР· СЌРєСЃС‚СЂРµРјСѓРјСѓ);
+													// С†РёРєР» РІ РєРѕС‚РѕСЂРѕРј СЃРјРµС‰Р°РµС‚СЃСЏ Р»РµРІР°СЏ РіСЂР°РЅРёС†Р° РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂРѕРІ
 				while ((j - leftEdge > user.minInterval) && (j < width))
 				{
 					if (image.extremum(j, 1, user.widthMask))
 					{
-						Sample temp;	// хранит результат наложения фильтров на фрагмет изображения
-						temp.filtering(image, leftEdge, j);	// наложение фильтров
-						nearestMatch = temp.compareWithBase(MinCD);	// находим расстояние до ближайшего эталона 
-						omp_set_lock(&lock);						// замок для корректного добавления значений в список
-																	// добавим найденное значение в список
+						Sample temp;	// С…СЂР°РЅРёС‚ СЂРµР·СѓР»СЊС‚Р°С‚ РЅР°Р»РѕР¶РµРЅРёСЏ С„РёР»СЊС‚СЂРѕРІ РЅР° С„СЂР°РіРјРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
+						temp.filtering(image, leftEdge, j);	// РЅР°Р»РѕР¶РµРЅРёРµ С„РёР»СЊС‚СЂРѕРІ
+						nearestMatch = temp.compareWithBase(MinCD);	// РЅР°С…РѕРґРёРј СЂР°СЃСЃС‚РѕСЏРЅРёРµ РґРѕ Р±Р»РёР¶Р°Р№С€РµРіРѕ СЌС‚Р°Р»РѕРЅР° 
+						omp_set_lock(&lock);						// Р·Р°РјРѕРє РґР»СЏ РєРѕСЂСЂРµРєС‚РЅРѕРіРѕ РґРѕР±Р°РІР»РµРЅРёСЏ Р·РЅР°С‡РµРЅРёР№ РІ СЃРїРёСЃРѕРє
+																	// РґРѕР±Р°РІРёРј РЅР°Р№РґРµРЅРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ РІ СЃРїРёСЃРѕРє
 						compliance.push_back(Compliance(leftEdge, j, nearestMatch, MinCD));
-						omp_unset_lock(&lock);						// снимем замок
+						omp_unset_lock(&lock);						// СЃРЅРёРјРµРј Р·Р°РјРѕРє
 					}
-					j--;		// правая граница смещается справа налево
+					j--;		// РїСЂР°РІР°СЏ РіСЂР°РЅРёС†Р° СЃРјРµС‰Р°РµС‚СЃСЏ СЃРїСЂР°РІР° РЅР°Р»РµРІРѕ
 				}
 			}
 		}
@@ -589,24 +589,24 @@ void Strainer::selection(Image& image, Settings& user)
 	omp_destroy_lock(&lock);
 }
 
-// убирает лишние значения
+// СѓР±РёСЂР°РµС‚ Р»РёС€РЅРёРµ Р·РЅР°С‡РµРЅРёСЏ
 void Strainer::minimize(Settings& user)
 {
-	compliance.sort();			// сортируем по значению x0(координата начала);
-	list<Compliance>::iterator  thisIter, newIter;	//создаём итераторы
-	thisIter = compliance.begin();				// инициализируем итераторы
+	compliance.sort();			// СЃРѕСЂС‚РёСЂСѓРµРј РїРѕ Р·РЅР°С‡РµРЅРёСЋ x0(РєРѕРѕСЂРґРёРЅР°С‚Р° РЅР°С‡Р°Р»Р°);
+	list<Compliance>::iterator  thisIter, newIter;	//СЃРѕР·РґР°С‘Рј РёС‚РµСЂР°С‚РѕСЂС‹
+	thisIter = compliance.begin();				// РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РёС‚РµСЂР°С‚РѕСЂС‹
 	newIter = compliance.begin();
-	newIter++;								// смещаем правый итератор 
+	newIter++;								// СЃРјРµС‰Р°РµРј РїСЂР°РІС‹Р№ РёС‚РµСЂР°С‚РѕСЂ 
 
-	for (; newIter != compliance.end();)		// пока правый итератор указывает на элемент список
+	for (; newIter != compliance.end();)		// РїРѕРєР° РїСЂР°РІС‹Р№ РёС‚РµСЂР°С‚РѕСЂ СѓРєР°Р·С‹РІР°РµС‚ РЅР° СЌР»РµРјРµРЅС‚ СЃРїРёСЃРѕРє
 	{
-		float layering = (thisIter->xEnd - newIter->x0); // найдём ширину наложения в пикселях
-														 // найдём ширину того из символов, который меньше:
+		float layering = (thisIter->xEnd - newIter->x0); // РЅР°Р№РґС‘Рј С€РёСЂРёРЅСѓ РЅР°Р»РѕР¶РµРЅРёСЏ РІ РїРёРєСЃРµР»СЏС…
+														 // РЅР°Р№РґС‘Рј С€РёСЂРёРЅСѓ С‚РѕРіРѕ РёР· СЃРёРјРІРѕР»РѕРІ, РєРѕС‚РѕСЂС‹Р№ РјРµРЅСЊС€Рµ:
 		float minW = (((thisIter->xEnd - thisIter->x0) < (newIter->xEnd - newIter->x0)) ?
 			(thisIter->xEnd - thisIter->x0) : (newIter->xEnd - newIter->x0));
-		// сравниваем соотношение ширины наложения и ширины символа с допустимым процентом наложения
+		// СЃСЂР°РІРЅРёРІР°РµРј СЃРѕРѕС‚РЅРѕС€РµРЅРёРµ С€РёСЂРёРЅС‹ РЅР°Р»РѕР¶РµРЅРёСЏ Рё С€РёСЂРёРЅС‹ СЃРёРјРІРѕР»Р° СЃ РґРѕРїСѓСЃС‚РёРјС‹Рј РїСЂРѕС†РµРЅС‚РѕРј РЅР°Р»РѕР¶РµРЅРёСЏ
 		if (layering / minW > (user.percentOverlay / 100))
-			// сохраняем символ с наименьшим Евклидовым расстоянием до одного из эталонов
+			// СЃРѕС…СЂР°РЅСЏРµРј СЃРёРјРІРѕР» СЃ РЅР°РёРјРµРЅСЊС€РёРј Р•РІРєР»РёРґРѕРІС‹Рј СЂР°СЃСЃС‚РѕСЏРЅРёРµРј РґРѕ РѕРґРЅРѕРіРѕ РёР· СЌС‚Р°Р»РѕРЅРѕРІ
 			if (thisIter->EuclideanMetric > newIter->EuclideanMetric)
 			{
 				thisIter = compliance.erase(thisIter);
@@ -624,7 +624,7 @@ void Strainer::minimize(Settings& user)
 	}
 }
 
-// вывод списка с найденными символами на экран
+// РІС‹РІРѕРґ СЃРїРёСЃРєР° СЃ РЅР°Р№РґРµРЅРЅС‹РјРё СЃРёРјРІРѕР»Р°РјРё РЅР° СЌРєСЂР°РЅ
 void Strainer::display()
 {
 	cout << "\nresult:" << endl;
