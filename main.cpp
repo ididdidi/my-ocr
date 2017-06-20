@@ -1,4 +1,4 @@
-// main.cpp: определяет точку входа для консольного приложения.
+// myOCR.cpp: РѕРїСЂРµРґРµР»СЏРµС‚ С‚РѕС‡РєСѓ РІС…РѕРґР° РґР»СЏ РєРѕРЅСЃРѕР»СЊРЅРѕРіРѕ РїСЂРёР»РѕР¶РµРЅРёСЏ.
 
 #include "stdafx.h"
 
@@ -29,7 +29,7 @@ int main()
 			cout << sx.value << '\"' << sx.description << endl;
 		}
 
-		cout << " Want to resume(y/n)? ";
+		cout << "\n Want to resume(y/n)? ";
 		cin >> renew;
 	} while (renew == 'y'|| renew == 'Y');
 	
