@@ -160,7 +160,7 @@ MatchBase.dat   | Данные тренировочной выборки
 
 ![Тренировка на искажённой выборке](https://github.com/rbforest/myOCR/blob/master/image/training_f.jpg)
 
-![Распознавание искаженных символов2](https://github.com/rbforest/myOCR/blob/master/image/detection_f2.jpg)]
+![Распознавание искаженных символов2](https://github.com/rbforest/myOCR/blob/master/image/detection_f2.jpg)
 
 **6. Заключение**
 
