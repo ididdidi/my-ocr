@@ -6,7 +6,7 @@ mode getMode()
 	char ch = 0;
 	while (true)
 	{
-		cout << " Select mode: the detection(d) or training(t)...";
+		cout << " Select training(t) mode or the detection(d) one...";
 		ch = _getch();
 		if (ch == 'd' || ch == 'D') {
 			cout << " detection...";
@@ -16,7 +16,7 @@ mode getMode()
 			cout << " training...";
 			return training;
 		}
-		cout << ch << " - not the right request" << endl;
+		cout << ch << " - incorrect request" << endl;
 	}
 }
 
