@@ -18,7 +18,7 @@
 #include <omp.h>
 using namespace std;
 
-#include "main.h"
+#include "Source.h"
 
 
 
